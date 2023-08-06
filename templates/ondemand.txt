@@ -11,6 +11,7 @@ IconUrl = "https://github.com/OSC/openondemand.org/blob/gh-pages/assets/images/o
 Autoscale = false
 
     [[node defaults]]
+    UsePublicNetwork = false
     Credentials = $Credentials    
     ImageName = $ImageName
     SubnetId = $SubnetId
