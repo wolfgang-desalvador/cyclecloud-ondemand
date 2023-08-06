@@ -67,6 +67,9 @@ Autoscale = false
 
         [[[cluster-init cyclecloud/pbspro:server]]]
         
+        [[[network-interface eth0]]]
+        AssociatePublicIpAddress = false
+
         [[[input-endpoint ganglia]]]
         PrivatePort = 8652
         PublicPort = 8652
