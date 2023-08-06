@@ -11,7 +11,6 @@ IconUrl = "https://github.com/OSC/openondemand.org/blob/gh-pages/assets/images/o
 Autoscale = false
 
     [[node defaults]]
-    UsePublicNetwork = $UsePublicNetwork
     Credentials = $Credentials    
     ImageName = $ImageName
     SubnetId = $SubnetId
@@ -19,7 +18,6 @@ Autoscale = false
     KeyPairLocation = ~/.ssh/cyclecloud.pem
     
         [[[configuration]]]
-        pbspro.version = $PBSVersion
         # For fast spin-up after Deallocate, force an immediate re-converge on boot
         cyclecloud.converge_on_boot = true
 
@@ -65,9 +63,6 @@ Autoscale = false
         [[[configuration]]]
         cyclecloud.mounts.nfs_sched.disabled = false
         cyclecloud.mounts.nfs_shared.disabled = false
-        pbspro.cron_method = $AzpbsCronMethod
-        pbspro.queues.workq.ignore = ${Autoscale != true}
-        pbspro.queues.htcq.ignore = ${Autoscale != true}
 
         [[[cluster-init cyclecloud/pbspro:server]]]
         
