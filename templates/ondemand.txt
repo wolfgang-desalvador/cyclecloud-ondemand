@@ -64,8 +64,6 @@ Autoscale = false
         [[[configuration]]]
         cyclecloud.mounts.nfs_sched.disabled = false
         cyclecloud.mounts.nfs_shared.disabled = false
-
-        [[[cluster-init cyclecloud/pbspro:server]]]
         
         [[[network-interface eth0]]]
         AssociatePublicIpAddress = false
