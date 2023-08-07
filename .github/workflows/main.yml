@@ -1,0 +1,71 @@
+# Based on example from https://github.com/actions/upload-release-asset
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+    - '*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+name: Upload Release Asset
+
+jobs:
+  build:
+    name: Upload Release Asset
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
+      - name: Get PBS binaries
+        id: get-pbs-binaries
+        run:
+          mkdir rpms/;
+          curl -L -k -o rpms/openpbs-client-20.0.1-0.x86_64.rpm https://github.com/Azure/cyclecloud-pbspro/releases/download/2023-03-29-bins//openpbs-client-20.0.1-0.x86_64.rpm;
+          curl -L -k -o rpms/openpbs-client-22.05.11-0.x86_64.rpm https://github.com/Azure/cyclecloud-pbspro/releases/download/2023-03-29-bins//openpbs-client-22.05.11-0.x86_64.rpm;
+          curl -L -k -o rpms/pbspro-client-18.1.4-0.x86_64.rpm https://github.com/Azure/cyclecloud-pbspro/releases/download/2023-03-29-bins//pbspro-client-18.1.4-0.x86_64.rpm;
+      
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: true
+
+      - name: Upload openpbs-client-20.0.1-0.x86_64.rpm;
+        id: upload-3
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: rpms/openpbs-client-20.0.1-0.x86_64.rpm
+          asset_name: openpbs-client-20.0.1-0.x86_64.rpm;
+          asset_content_type: application/octet-stream
+
+      - name: Upload openpbs-client-22.05.11-0.x86_64.rpm;
+        id: upload-4
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: rpms/openpbs-client-22.05.11-0.x86_64.rpm
+          asset_name: openpbs-client-22.05.11-0.x86_64.rpm;
+          asset_content_type: application/octet-stream
+
+      - name: Upload pbspro-client-18.1.4-0.x86_64.rpm;
+        id: upload-9
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: rpms/pbspro-client-18.1.4-0.x86_64.rpm
+          asset_name: pbspro-client-18.1.4-0.x86_64.rpm;
+          asset_content_type: application/octet-stream
+
