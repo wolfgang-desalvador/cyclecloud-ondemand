@@ -7,6 +7,8 @@ source $PYTHON_INTERPRETER/bin/activate
 
 $PYTHON_INTERPRETER/bin/python $SCRIPT_FOLDER/../files/add_server_name.py
 
+$PYTHON_INTERPRETER/bin/python $SCRIPT_FOLDER/../files/add_extra_configuration.py
+
 rm -rf /var/run/ondemand-nginx/*
 
 systemctl enable --now httpd24-httpd

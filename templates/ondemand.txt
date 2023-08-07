@@ -41,6 +41,10 @@ Autoscale = false
         ondemand.ssl.certificateKeyName = $certificateKeyName
         ondemand.portal.ip = $PortalIP
         ondemand.portal.serverName = $PortalName
+        ondemand.portal.extraConfiguration = $extraConfiguration
+        ondemand.scheduler.type = $schedulerType
+        ondemand.scheduler.host = $schedulerHost
+        ondemand.scheduler.version = $schedulerVersion
         ondemand.keyVaultName = $AzureKeyVaultName
 
         [[[cluster-init cyclecloud/ondemand:default]]]
@@ -71,7 +75,6 @@ Autoscale = false
     ImageName = $SchedulerImageName
     MachineType = $serverMachineType
     AdditionalClusterInitSpecs = $serverClusterInitSpecs
-    ComputerName = $onDemandServerName
     
         [[[configuration]]]
         cyclecloud.mounts.nfs_sched.disabled = true
@@ -85,6 +88,11 @@ Autoscale = false
         PrivatePort = 8652
         PublicPort = 8652
 
+        [[[volume ood]]]
+        Size = 64
+        SSD = True
+        Mount = /ood
+        Persistent = True
 
 [parameters About]
 Order = 1
@@ -94,12 +102,15 @@ Order = 1
         [[[parameter pbspro]]]
         HideLabel = true
         Config.Plugin = pico.widget.HtmlTemplateWidget
-        Config.Template := "<table role=\"presentation\">
-        <tr><td> <a> <img width="512" alt="OnDemand logo" src="https://github.com/OSC/openondemand.org/blob/gh-pages/assets/images/ood_logo_stack_rgb.png?raw=true"> </a>  </td></tr>
-        <tr> <td> <p>&nbsp;</p> </td></tr> 
-        <tr> <td> <p>&nbsp;</p> </td></tr> 
-        <tr><td><p><b>Open OnDemand</b> empowers students, researchers, and industry professionals with remote web access to supercomputers.</p></td></tr>  
-        <tr><td><p><a href=\"https://openondemand.org/\" target=\"_blank\">OnDemand project site</a> for an overview.</p></td></tr></table>"
+        Config.Template = '''<table role="presentation"> <img width="512" alt="OnDemand logo" src="https://github.com/OSC/openondemand.org/blob/gh-pages/assets/images/ood_logo_stack_rgb.png?raw=true"> </a>  </td></tr> 
+                                <tr> <td> <p>&nbsp;</p> </td></tr> 
+                                <tr><td><big><b>Thank you for using Open On Demand! </big> </b></td></tr> 
+                                <tr><td><p><b>Open OnDemand</b> empowers students, researchers, and industry professionals with remote web access to supercomputers.</p>
+                                         </td></tr> 
+                                         <tr> <td> <p>&nbsp;</p> </td></tr> 
+                                         <tr><td> <p> <big><b><a href=\"https://openondemand.org/\" target=\"_blank\">OnDemand project site</a> for an overview. </big> </b></p></td></tr> 
+                                         <tr><td><ul>
+                                            </ul> </td></tr></table>'''
 
 [parameters Required Settings]
 Order = 10
@@ -118,15 +129,6 @@ Order = 10
         Description = The VM type for scheduler server and shared filer.
         ParameterType = Cloud.MachineType
         DefaultValue = Standard_D8as_v4
-
-
-        [[[parameter onDemandServerName]]]
-        Label = Server Name
-        Description = The VM Name in Azure
-        ParameterType = String
-        DefaultValue = ondemand-server
-        Required = True
-
 
     [[parameters Networking]]
     Order = 40
@@ -170,8 +172,8 @@ Order = 15
         ParameterType = StringList
         Config.Label = Type of NFS to use for this cluster
         Config.Plugin = pico.form.Dropdown
-        Config.Entries := {[Label="External NFS"; Value="External"], [Label="Builtin"; Value="Builtin"]}
-        DefaultValue = Builtin
+        Config.Entries := {[Label="External NFS"; Value="External"]}
+        DefaultValue = External
 
 	[[[parameter NFSDiskWarning]]]
 	HideLabel = true
@@ -262,41 +264,47 @@ Order = 17
         Description = The OnDemand portal server name, ideally the FQDN
         Required = true
         Order = 4
+        
+        [[[parameter extraConfiguration]]]
+        ParameterType = Text
+        Label = Extra configuration
+        Description = Extra configuration to concatenate to OnDemand YML configuration file
+        Order = 5
 
     [[parameters Secrets Configuration]]
-        Order = 5
+        Order = 15
         [[[parameter About Managed Identity]]]
         HideLabel = true
         Config.Plugin = pico.widget.HtmlTemplateWidget
         Config.Template = ''' <p> The Managed Identity will be used during configuration to retrieve secrets from the target Azure Key Vault. 
             '''
-        Order = 6
+        Order = 16
 
         [[[parameter ManagedServiceIdentity]]]
         ParameterType = Azure.ManagedIdentity
         Label = MSI Identity
         Description = The Azure user assigned managed identity to access the Azure Key Vault secret and certificate. Make sure it has 'Get' Permission of the Azure Key vault secret and certificate. The identity will be applied to all nodes.
         Required = true
-        Order = 7
+        Order = 17
 
         [[[parameter AzureKeyVaultName]]]
         ParameterType = String
         Label = Vault Name
         Description = Azure Vault Name containing the secrets
         Required = true
-        Order = 8
+        Order = 18
 
 
     [[parameters Authentication]]
         
-        Order = 9
+        Order = 19
         [[[parameter About Authentication]]]
         HideLabel = true
         Config.Plugin = pico.widget.HtmlTemplateWidget
         Config.Template = ''' <p> Authentication for OnDemand portal can be based on Basic Apache auth (using PAM) or on OIDC. In production, it is strongly suggested to avoid Basic authentication.
             OIDC authentication can bind to a LDAP server through Dex or directly to an OIDC provider 
             '''
-        Order = 10
+        Order = 20
 
         [[[parameter AuthType]]]
         Label = Authentication Type
@@ -305,7 +313,7 @@ Order = 17
         Config.Plugin = pico.form.Dropdown
         Config.Entries := {[Label="Basic"; Value="basic"], [Label="OIDC AD"; Value="oidc_ad"]}
         DefaultValue = basic
-        Order = 11
+        Order = 21
 
 
         [[[parameter AuthType]]]
@@ -315,7 +323,7 @@ Order = 17
         Config.Plugin = pico.form.Dropdown
         Config.Entries := {[Label="Basic"; Value="basic"], [Label="OIDC AAD"; Value="oidc_aad"]}
         DefaultValue = basic
-        Order = 11
+        Order = 22
 
         [[[parameter ClientID]]]
         Label = Client ID
@@ -323,7 +331,7 @@ Order = 17
         DefaultValue = ""
         Conditions.Excluded := AuthType != "oidc_aad"
         Required = AuthType == "oidc_aad"
-        Order = 12
+        Order = 23
 
         [[[parameter ClientSecretName]]]
         Label = Secret Name
@@ -331,7 +339,7 @@ Order = 17
         DefaultValue = ""
         Conditions.Excluded := AuthType != "oidc_aad"
         Required = AuthType == "oidc_aad"
-        Order = 13
+        Order = 24
 
         [[[parameter MetadataURL]]]
         Label = Metadata URL
@@ -339,7 +347,7 @@ Order = 17
         DefaultValue = "https://login.microsoftonline.com/{tenant_id}/v2.0/.well-known/openid-configuration"
         Conditions.Excluded := AuthType != "oidc_aad"
         Required = AuthType == "oidc_aad"
-        Order = 14
+        Order = 25
   
     [[parameters SSL Configuration]]
         
@@ -376,6 +384,34 @@ Order = 17
         Conditions.Excluded := SSLType == "self_signed"
         Required = SSLType != "self_signed"
 
+
+[parameters Scheduler]
+Order = 18
+
+    [[parameters Scheduler Definition]]
+        Order = 10
+        [[[parameter schedulerType]]]
+        Label = Scheduler Type
+        ParameterType = StringList
+        Config.Label = Type of the scheduler
+        Config.Plugin = pico.form.Dropdown
+        Config.Entries := {[Label="OpenPBS"; Value="pbs"]}
+        DefaultValue = pbs
+
+        [[[parameter schedulerHost]]]
+        ParameterType = String
+        Label = Scheduler host 
+        Description = Scheduler host
+        Required = true
+        Order = 14
+
+        [[[parameter schedulerVersion]]]
+        Label = Scheduler Version
+        ParameterType = StringList
+        Config.Label = Version of the scheduler
+        Config.Plugin = pico.form.Dropdown
+        Config.Entries := {[Label="18.1.4"; Value="18.1.4"]}
+        DefaultValue = 18.1.4
 
 [parameters Advanced Settings]
 Order = 20

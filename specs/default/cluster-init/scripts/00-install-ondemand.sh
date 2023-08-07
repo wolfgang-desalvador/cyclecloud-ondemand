@@ -6,6 +6,12 @@ PYTHON_INTERPRETER="/opt/cycle/ondemand"
 setenforce 0
 systemctl disable --now firewalld
 
+mkdir -p /ood/etc
+mkdir -p /ood/opt
+
+ln -s /ood/etc /etc/ood
+ln -s /ood/opt /opt/ood
+
 yum install -y centos-release-scl epel-release
 
 yum install -y https://yum.osc.edu/ondemand/3.0/ondemand-release-web-3.0-1.noarch.rpm

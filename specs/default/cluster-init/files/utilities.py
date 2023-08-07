@@ -26,3 +26,8 @@ def getSecretValue(keyVaultName, secretName):
     credential = DefaultAzureCredential()
     client = SecretClient(vault_url=vaultURL, credential=credential)
     return client.get_secret(secretName).value
+
+def concatenateToOnDemandConfiguration(configuration):
+    with open('/etc/ood/config/ood_portal.yml', 'w') as fid:
+        for line in configuration:
+            fid.write(line)
