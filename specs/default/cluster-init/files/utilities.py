@@ -14,6 +14,9 @@ def readOnDemandConfiguration():
     with open('/etc/ood/config/ood_portal.yml', 'r') as fid:
         onDemandConfiguration = yaml.load(fid, Loader=yaml.Loader)  
     
+    if onDemandConfiguration is None:
+        onDemandConfiguration = {}
+        
     return onDemandConfiguration
 
 def writeOnDemandConfiguration(configuration):

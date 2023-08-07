@@ -91,8 +91,15 @@ Autoscale = false
         [[[volume ood]]]
         Size = 64
         SSD = True
-        Mount = /ood
+        Mount = ood
         Persistent = True
+        
+        [[[configuration cyclecloud.mounts.ood]]]
+        disabled = false
+        mountpoint = /ood
+        fs_type = xfs
+
+
 
 [parameters About]
 Order = 1
