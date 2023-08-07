@@ -16,7 +16,7 @@ def readOnDemandConfiguration():
     
     if onDemandConfiguration is None:
         onDemandConfiguration = {}
-        
+
     return onDemandConfiguration
 
 def writeOnDemandConfiguration(configuration):
@@ -31,6 +31,6 @@ def getSecretValue(keyVaultName, secretName):
     return client.get_secret(secretName).value
 
 def concatenateToOnDemandConfiguration(configuration):
-    with open('/etc/ood/config/ood_portal.yml', 'w') as fid:
+    with open('/etc/ood/config/ood_portal.yml', 'a') as fid:
         for line in configuration:
             fid.write(line)

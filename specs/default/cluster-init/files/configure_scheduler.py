@@ -1,6 +1,7 @@
 import json
 import subprocess
 import yaml
+import os
 
 from utilities import executeCommandList
 
@@ -30,6 +31,7 @@ if config['ondemand']['scheduler']['type'] == 'pbs':
             'job': {'host': schedulerHost, 'adapter': 'pbspro', 'exec': '/opt/pbs'}
         }
     }
-
-    yaml.dump(clusterDefinition, open('/etc/ood/config/clusters.d/pbs.yml'))
+    if not os.path.exists('/etc/ood/config/clusters.d/'):
+        os.mkdir('/etc/ood/config/clusters.d/') 
+    yaml.dump(clusterDefinition, open('/etc/ood/config/clusters.d/pbs.yml', 'w'))
 
