@@ -1,14 +1,19 @@
 import json
 import subprocess
-from OpenSSL import crypto, SSL
+import datetime
 
-from .utilities import readOnDemandConfiguration, writeOnDemandConfiguration, getSecretValue
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes
+from cryptography.x509.oid import NameOID
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+
+from utilities import readOnDemandConfiguration, writeOnDemandConfiguration, getSecretValue
 
 
 config = json.loads(subprocess.check_output(["/opt/cycle/jetpack/bin/jetpack", "config", "--json"]))
 
-authenticationType = config['ondemand']['SSLType']
-
+authenticationType = config['ondemand']['ssl']['SSLType']
 
 onDemandConfiguration = readOnDemandConfiguration()
 
@@ -21,34 +26,51 @@ writeOnDemandConfiguration(onDemandConfiguration)
 
 if authenticationType == 'self_signed':
 
-    key = crypto.PKey()
-    key.generate_key(crypto.TYPE_RSA, 4096)
+    # Generate our key
+    key = rsa.generate_private_key(
+        public_exponent=65537,
+        key_size=2048,
+    )
 
-    # create a self-signed cert
-    cert = crypto.X509()
-    cert.get_subject().CN = config['portal']['serverName']
-    cert.set_serial_number(1000)
-    cert.gmtime_adj_notBefore(0)
-    cert.gmtime_adj_notAfter(10*365*24*60*60)
-    cert.set_issuer(cert.get_subject())
-    cert.add_extensions([
-            crypto.X509Extension(b'subjectAltName', False, 'DNS:{}'.format(config['portal']['serverName']).encode())
+    with open("/etc/ssl/ssl-ondemand.key", "wb") as f:
+        f.write(key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.NoEncryption()
+        ))
+
+    # Various details about who we are. For a self-signed certificate the
+    # subject and issuer are always the same.
+    subject = issuer = x509.Name([
+        x509.NameAttribute(NameOID.COMMON_NAME, config['ondemand']['portal']['serverName']),
     ])
-    cert.set_pubkey(key)
-    cert.sign(key, 'sha256')
 
-    open('/etc/ssl/ssl-ondemand.crt', "wt").write(
-        crypto.dump_certificate(crypto.FILETYPE_PEM, cert)
-    )
-    open('/etc/ssl/ssl-ondemand.key', "wt").write(
-        crypto.dump_privatekey(crypto.FILETYPE_PEM, key)
-    )
-    
+    cert = x509.CertificateBuilder().subject_name(
+        subject
+    ).issuer_name(
+        issuer
+    ).public_key(
+        key.public_key()
+    ).serial_number(
+        x509.random_serial_number()
+    ).not_valid_before(
+        datetime.datetime.now(datetime.timezone.utc)
+    ).not_valid_after(
+        # Our certificate will be valid for 10 days
+        datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=10)
+    ).add_extension(
+        x509.SubjectAlternativeName([x509.DNSName(config['ondemand']['portal']['serverName'])]),
+        critical=False,
+    # Sign our certificate with our private key
+    ).sign(key, hashes.SHA256())
+
+    # Write our certificate out to disk.
+    with open("/etc/ssl/ssl-ondemand.crt", "wb") as f:
+        f.write(cert.public_bytes(serialization.Encoding.PEM))
 
 elif authenticationType == 'keyvault':
     with open('/etc/ssl/ssl-ondemand.crt', 'w') as fid:
         fid.write(getSecretValue(config['keyVaultName'], config['ssl']['certficateName']))
-    
+
     with open('/etc/ssl/ssl-ondemand.key', 'w') as fid:
         fid.write(getSecretValue(config['keyVaultName'], config['ssl']['certficateKeyName']))
-

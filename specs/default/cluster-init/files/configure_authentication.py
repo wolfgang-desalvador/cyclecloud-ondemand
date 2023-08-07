@@ -1,12 +1,12 @@
 import json
 import subprocess
 
-from .utilities import executeCommandList, readOnDemandConfiguration, writeOnDemandConfiguration, getSecretValue
+from utilities import executeCommandList, readOnDemandConfiguration, writeOnDemandConfiguration, getSecretValue
 
 
 config = json.loads(subprocess.check_output(["/opt/cycle/jetpack/bin/jetpack", "config", "--json"]))
 
-authenticationType = config['ondemand']['AuthType']
+authenticationType = config['ondemand']['auth']['AuthType']
 
 
 if authenticationType == 'basic':
@@ -41,11 +41,11 @@ elif authenticationType == 'oidc_aad':
         "Require valid-user",
     ]
 
-    onDemandConfiguration['logout_redirect'] = "/oidc?logout=https%3A%2F%2F{}".format(config['portal']['serverName'])
-    onDemandConfiguration['oidc_provider_metadata_url'] = config['auth']['oidcAAD']['MetadataURL']
-    onDemandConfiguration['oidc_client_id'] = config['auth']['oidcAAD']['ClientID']
+    onDemandConfiguration['logout_redirect'] = "/oidc?logout=https%3A%2F%2F{}".format(config['ondemand']['portal']['serverName'])
+    onDemandConfiguration['oidc_provider_metadata_url'] = config['ondemand']['auth']['oidcAAD']['MetadataURL']
+    onDemandConfiguration['oidc_client_id'] = config['ondemand']['auth']['oidcAAD']['ClientID']
 
-    onDemandConfiguration['oidc_client_secret'] = getSecretValue(config['keyVaultName'], config['auth']['oidcAAD']['ClientSecretName'])
+    onDemandConfiguration['oidc_client_secret'] = getSecretValue(config['ondemand']['keyVaultName'], config['ondemand']['auth']['oidcAAD']['ClientSecretName'])
 
     onDemandConfiguration.update({
         "oidc_uri": "/oidc",
