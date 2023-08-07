@@ -17,6 +17,7 @@ Autoscale = false
     SubnetId = $SubnetId
     Region = $Region
     KeyPairLocation = ~/.ssh/cyclecloud.pem
+    Azure.Identities = $ManagedServiceIdentity
     
         [[[configuration]]]
         # For fast spin-up after Deallocate, force an immediate re-converge on boot
@@ -68,6 +69,7 @@ Autoscale = false
         
         [[[network-interface eth0]]]
         AssociatePublicIpAddress = false
+        PrivateIp = $PortalIP
 
         [[[input-endpoint ganglia]]]
         PrivatePort = 8652
@@ -221,7 +223,23 @@ Order = 15
 [parameters OnDemand Portal]
 Order = 17
 
-    [[parameters Configuration Secrets]]
+    [[parameters Portal]]
+
+        [[[parameter PortalIP]]]
+        ParameterType = String
+        Label = Open OnDemand Portal IP
+        Description = The private IP address to be assigned to Open OnDemand Potal
+        Required = true
+        Order = 3
+
+        [[[parameter PortalName]]]
+        ParameterType = String
+        Label = Open OnDemand Portal Server Name
+        Description = The OnDemand portal server name, ideally the FQDN
+        Required = true
+        Order = 4
+
+    [[parameters Secrets Configuration]]
         Order = 5
         [[[parameter About Managed Identity]]]
         HideLabel = true
