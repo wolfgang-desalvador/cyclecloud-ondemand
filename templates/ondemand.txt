@@ -71,6 +71,7 @@ Autoscale = false
     ImageName = $SchedulerImageName
     MachineType = $serverMachineType
     AdditionalClusterInitSpecs = $serverClusterInitSpecs
+    ComputerName = $onDemandServerName
     
         [[[configuration]]]
         cyclecloud.mounts.nfs_sched.disabled = true
@@ -93,7 +94,12 @@ Order = 1
         [[[parameter pbspro]]]
         HideLabel = true
         Config.Plugin = pico.widget.HtmlTemplateWidget
-        Config.Template := "<table role=\"presentation\"><tr><td><p>Open OnDemand empowers students, researchers, and industry professionals with remote web access to supercomputers.  <a href=\"http://www.openpbs.org/\" target=\"_blank\">OnDemand project site</a> for an overview.</p></td></tr></table>"
+        Config.Template := "<table role=\"presentation\">
+        <tr><td> <a> <img width="512" alt="OnDemand logo" src="https://github.com/OSC/openondemand.org/blob/gh-pages/assets/images/ood_logo_stack_rgb.png?raw=true"> </a>  </td></tr>
+        <tr> <td> <p>&nbsp;</p> </td></tr> 
+        <tr> <td> <p>&nbsp;</p> </td></tr> 
+        <tr><td><p><b>Open OnDemand</b> empowers students, researchers, and industry professionals with remote web access to supercomputers.</p></td></tr>  
+        <tr><td><p><a href=\"https://openondemand.org/\" target=\"_blank\">OnDemand project site</a> for an overview.</p></td></tr></table>"
 
 [parameters Required Settings]
 Order = 10
@@ -112,6 +118,15 @@ Order = 10
         Description = The VM type for scheduler server and shared filer.
         ParameterType = Cloud.MachineType
         DefaultValue = Standard_D8as_v4
+
+
+        [[[parameter onDemandServerName]]]
+        Label = Server Name
+        Description = The VM Name in Azure
+        ParameterType = String
+        DefaultValue = ondemand-server
+        Required = True
+
 
     [[parameters Networking]]
     Order = 40
