@@ -3,6 +3,8 @@
 SCRIPT_FOLDER="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 PYTHON_INTERPRETER="/opt/cycle/ondemand"
 
+setenforce 0
+systemctl disable --now firewalld
 
 yum install -y centos-release-scl epel-release
 
@@ -20,4 +22,4 @@ systemctl enable httpd24-httpd
 /usr/bin/python3 -m venv ondemand $PYTHON_INTERPRETER
 source $PYTHON_INTERPRETER/bin/activate
 $PYTHON_INTERPRETER/bin/python -m pip install --upgrade pip
-$PYTHON_INTERPRETER/bin/python -m pip install azure-keyvault-secrets azure-identity
+$PYTHON_INTERPRETER/bin/python -m pip install azure-keyvault-secrets azure-identity PyYAML

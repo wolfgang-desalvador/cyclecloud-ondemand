@@ -31,6 +31,7 @@ Autoscale = false
         cyclecloud.exports.shared.samba.enabled = false
         cyclecloud.exports.defaults.samba.enabled = false      
         cshared.server.legacy_links_disabled = true
+        ondemand.AuthType = $AuthType
 
         [[[cluster-init cyclecloud/ondemand:default]]]
         Optional = false
@@ -62,7 +63,7 @@ Autoscale = false
     AdditionalClusterInitSpecs = $serverClusterInitSpecs
     
         [[[configuration]]]
-        cyclecloud.mounts.nfs_sched.disabled = false
+        cyclecloud.mounts.nfs_sched.disabled = true
         cyclecloud.mounts.nfs_shared.disabled = false
         
         [[[network-interface eth0]]]
@@ -217,6 +218,47 @@ Order = 15
         Description = NFS Client Mount Options
         Conditions.Excluded := AdditionalNAS isnt true
     
+[parameters OnDemand Portal]
+Order = 17
+
+    [[parameters Configuration Secrets]]
+        Order = 5
+        [[[parameter About Managed Identity]]]
+        HideLabel = true
+        Config.Plugin = pico.widget.HtmlTemplateWidget
+        Config.Template = ''' <p> The Managed Identity will be used during configuration to retrieve secrets from the target Azure Ke yVault. 
+            '''
+        Order = 6
+
+        [[[parameter ManagedServiceIdentity]]]
+        ParameterType = Azure.ManagedIdentity
+        Label = MSI Identity
+        Description = The Azure user assigned managed identity to access the Azure Key Vault secret and certificate. Make sure it has 'Get' Permission of the Azure Key vault secret and certificate. The identity will be applied to all nodes.
+        Required = true
+        Conditions.Excluded := !UseKeyVault
+        Order = 7
+
+    [[parameters Authentication]]
+        Order = 8
+        
+        Order = 9
+        [[[parameter About Authentication]]]
+        HideLabel = true
+        Config.Plugin = pico.widget.HtmlTemplateWidget
+        Config.Template = ''' <p> Authentication for OnDemand portal can be based on Basic Apache auth (using PAM) or on OIDC. In production, it is strongly suggested to avoid Basic authentication.
+            OIDC authentication can bind to a LDAP server through Dex or directly to an OIDC provider 
+            '''
+        Order = 10
+
+        [[[parameter AuthType]]]
+        Label = Authentication Type
+        ParameterType = StringList
+        Config.Label = Type of authentication to use in the portal
+        Config.Plugin = pico.form.Dropdown
+        Config.Entries := {[Label="Basic"; Value="basic"]}
+        DefaultValue = basic
+        Order = 11
+  
 
 
 [parameters Advanced Settings]
@@ -238,8 +280,8 @@ Order = 20
         Label = Scheduler OS
         ParameterType = Cloud.Image
         Config.OS = linux
-        DefaultValue = almalinux8
-        Config.Filter := Package in {"cycle.image.centos7", "almalinux8"}
+        DefaultValue = OpenLogic:CentOS-HPC:7_9-gen2:7.9.2022040101
+        Config.Filter := Package in {"OpenLogic:CentOS-HPC:7_9-gen2:7.9.2022040101"}
 
         [[[parameter serverClusterInitSpecs]]]
         Label = Server Cluster-Init
