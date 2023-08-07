@@ -33,13 +33,15 @@ Autoscale = false
         cyclecloud.exports.defaults.samba.enabled = false      
         cshared.server.legacy_links_disabled = true
         ondemand.auth.AuthType = $AuthType
+        ondemand.auth.oidcAAD.ClientID = $ClientID
+        ondemand.auth.oidcAAD.ClientSecretName = $ClientSecretName
+        ondemand.auth.oidcAAD.MetadataURL = $MetadataURL
         ondemand.ssl.SSLType = $SSLType
         ondemand.ssl.certificateName = $certificateName
         ondemand.ssl.certificateKeyName = $certificateKeyName
         ondemand.portal.ip = $PortalIP
         ondemand.portal.serverName = $PortalName
-
-
+        ondemand.keyVaultName = $AzureKeyVaultName
 
         [[[cluster-init cyclecloud/ondemand:default]]]
         Optional = false
@@ -262,6 +264,14 @@ Order = 17
         Required = true
         Order = 7
 
+        [[[parameter AzureKeyVaultName]]]
+        ParameterType = String
+        Label = Vault Name
+        Description = Azure Vault Name containing the secrets
+        Required = true
+        Order = 8
+
+
     [[parameters Authentication]]
         
         Order = 9
@@ -278,20 +288,54 @@ Order = 17
         ParameterType = StringList
         Config.Label = Type of authentication to use in the portal
         Config.Plugin = pico.form.Dropdown
-        Config.Entries := {[Label="Basic"; Value="basic"]}
+        Config.Entries := {[Label="Basic"; Value="basic"], [Label="OIDC AD"; Value="oidc_ad"]}
         DefaultValue = basic
         Order = 11
+
+
+        [[[parameter AuthType]]]
+        Label = Authentication Type
+        ParameterType = StringList
+        Config.Label = Type of authentication to use in the portal
+        Config.Plugin = pico.form.Dropdown
+        Config.Entries := {[Label="Basic"; Value="basic"], [Label="OIDC AAD"; Value="oidc_aad"]}
+        DefaultValue = basic
+        Order = 11
+
+        [[[parameter ClientID]]]
+        Label = Client ID
+        Description = OIDC Application ID in Azure Active Directory
+        DefaultValue = ""
+        Conditions.Excluded := AuthType != "oidc_aad"
+        Required = AuthType == "oidc_aad"
+        Order = 12
+
+        [[[parameter ClientSecretName]]]
+        Label = Secret Name
+        Description = Client Secret Name in Azure Key Vault
+        DefaultValue = ""
+        Conditions.Excluded := AuthType != "oidc_aad"
+        Required = AuthType == "oidc_aad"
+        Order = 13
+
+        [[[parameter MetadataURL]]]
+        Label = Metadata URL
+        Description = Metadata URL
+        DefaultValue = "https://login.microsoftonline.com/{tenant_id}/v2.0/.well-known/openid-configuration"
+        Conditions.Excluded := AuthType != "oidc_aad"
+        Required = AuthType == "oidc_aad"
+        Order = 14
   
     [[parameters SSL Configuration]]
         
-        Order = 12
+        Order = 32
         [[[parameter About SSL]]]
         HideLabel = true
         Config.Plugin = pico.widget.HtmlTemplateWidget
         Config.Template = ''' <p> Select how to enforce SSL in the portal. The self-signed option can be used for testing, but moving to production, an SSL Cert from a relevant CA must be 
            configured in the portal and placed in the Azure Key Vault
             '''
-        Order = 13
+        Order = 33
 
         [[[parameter SSLType]]]
         Label = SSL Type
@@ -300,7 +344,7 @@ Order = 17
         Config.Plugin = pico.form.Dropdown
         Config.Entries := {[Label="Self-signed"; Value="self_signed"], [Label="From Azure Key Vault"; Value="keyvault"]}
         DefaultValue = self_signed
-        Order = 14
+        Order = 34
 
         [[[parameter certificateName]]]
         Label = Certificate Name

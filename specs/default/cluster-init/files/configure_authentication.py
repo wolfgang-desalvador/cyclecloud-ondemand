@@ -1,28 +1,66 @@
 import json
 import subprocess
 
-config = json.loads(subprocess.check_output(["/opt/cycle/jetpack/bin/jetpack", "config", "--json"]))
+from .utilities import executeCommandList, readOnDemandConfiguration, writeOnDemandConfiguration, getSecretValue
 
+
+config = json.loads(subprocess.check_output(["/opt/cycle/jetpack/bin/jetpack", "config", "--json"]))
 
 authenticationType = config['ondemand']['AuthType']
 
-if authenticationType == 'basic':
 
-    subprocess.check_output('yum -y install mod_authnz_pam'.split(" "))
-    subprocess.check_output('cp /usr/lib64/httpd/modules/mod_authnz_pam.so /opt/rh/httpd24/root/usr/lib64/httpd/modules/'.split(" "))
-    subprocess.check_output('echo "LoadModule authnz_pam_module modules/mod_authnz_pam.so" > /opt/rh/httpd24/root/etc/httpd/conf.modules.d/55-authnz_pam.conf'.split(" "))
-    subprocess.check_output('cp /etc/pam.d/sshd /etc/pam.d/ood'.split(" "))
-    subprocess.check_output('chmod 640 /etc/shadow'.split(" "))
-    subprocess.check_output('chgrp apache /etc/shadow'.split(" "))
+if authenticationType == 'basic':
+    executeCommandList([   
+        "yum -y install mod_authnz_pam",
+        "cp /usr/lib64/httpd/modules/mod_authnz_pam.so /opt/rh/httpd24/root/usr/lib64/httpd/modules/",
+        "echo ""LoadModule authnz_pam_module modules/mod_authnz_pam.so"" > /opt/rh/httpd24/root/etc/httpd/conf.modules.d/55-authnz_pam.conf",
+        "cp /etc/pam.d/sshd /etc/pam.d/ood",
+        "chmod 640 /etc/shadow",
+        "chgrp apache /etc/shadow"
+    ])
     
     
-    with open('/etc/ood/config/ood_portal.yml', 'a')as fid:
-        fid.write('auth:\n')
-        fid.write('  - "AuthType Basic"\n')
-        fid.write('  - "AuthName ""Open OnDemand""\n')
-        fid.write('  - "AuthBasicProvider PAM"\n')
-        fid.write('  - "AuthPAMService ood"\n')
-        fid.write('  - "Require valid-user"      \n')
+    onDemandConfiguration = readOnDemandConfiguration()
+
+    onDemandConfiguration['auth'] = [
+        "AuthType Basic",
+        "AuthName ""Open OnDemand""",
+        "AuthBasicProvider PAM",
+        "AuthPAMService ood",
+        "Require valid-user"
+    ]
+
+    writeOnDemandConfiguration(onDemandConfiguration)
     
-    subprocess.check_output('systemctl restart httpd24-httpd.service'.split(" "))
-        
+
+elif authenticationType == 'oidc_aad':
+    onDemandConfiguration = readOnDemandConfiguration()
+
+    onDemandConfiguration['auth'] = [
+        "AuthType openid-connect",
+        "Require valid-user",
+    ]
+
+    onDemandConfiguration['logout_redirect'] = "/oidc?logout=https%3A%2F%2F{}".format(config['portal']['serverName'])
+    onDemandConfiguration['oidc_provider_metadata_url'] = config['auth']['oidcAAD']['MetadataURL']
+    onDemandConfiguration['oidc_client_id'] = config['auth']['oidcAAD']['ClientID']
+
+    onDemandConfiguration['oidc_client_secret'] = getSecretValue(config['keyVaultName'], config['auth']['oidcAAD']['ClientSecretName'])
+
+    onDemandConfiguration.update({
+        "oidc_uri": "/oidc",
+        "oidc_remote_user_claim": "preferred_username",
+        "oidc_scope": "openid profile email",
+        "oidc_session_inactivity_timeout": 28800,
+        "oidc_session_max_duration": 28800,
+        "oidc_state_max_number_of_cookies": "10 true",
+        "oidc_settings": {
+            "OIDCPassIDTokenAs": "serialized",
+            "OIDCPassRefreshToken": "On",
+            "OIDCPassClaimsAs": "environment",
+            "OIDCStripCookies": "mod_auth_openidc_session mod_auth_openidc_session_chunks mod_auth_openidc_session_0 mod_auth_openidc_session_1",
+            "OIDCResponseType": "code"
+            }
+    })
+
+    writeOnDemandConfiguration(onDemandConfiguration)
