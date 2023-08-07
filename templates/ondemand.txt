@@ -239,7 +239,6 @@ Order = 17
         Order = 7
 
     [[parameters Authentication]]
-        Order = 8
         
         Order = 9
         [[[parameter About Authentication]]]
