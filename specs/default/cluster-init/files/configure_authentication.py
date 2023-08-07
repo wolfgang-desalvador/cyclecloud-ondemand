@@ -8,12 +8,12 @@ authenticationType = config['ondemand']['AuthType']
 
 if authenticationType == 'basic':
 
-    subprocess.check_output('sudo yum -y install mod_authnz_pam'.split(" "))
-    subprocess.check_output('sudo cp /usr/lib64/httpd/modules/mod_authnz_pam.so /opt/rh/httpd24/root/usr/lib64/httpd/modules/'.split(" "))
-    subprocess.check_output('sudo echo "LoadModule authnz_pam_module modules/mod_authnz_pam.so" > /opt/rh/httpd24/root/etc/httpd/conf.modules.d/55-authnz_pam.conf'.split(" "))
-    subprocess.check_output('sudo cp /etc/pam.d/sshd /etc/pam.d/ood'.split(" "))
-    subprocess.check_output('sudo chmod 640 /etc/shadow'.split(" "))
-    subprocess.check_output('sudo chgrp apache /etc/shadow'.split(" "))
+    subprocess.check_output('yum -y install mod_authnz_pam'.split(" "))
+    subprocess.check_output('cp /usr/lib64/httpd/modules/mod_authnz_pam.so /opt/rh/httpd24/root/usr/lib64/httpd/modules/'.split(" "))
+    subprocess.check_output('echo "LoadModule authnz_pam_module modules/mod_authnz_pam.so" > /opt/rh/httpd24/root/etc/httpd/conf.modules.d/55-authnz_pam.conf'.split(" "))
+    subprocess.check_output('cp /etc/pam.d/sshd /etc/pam.d/ood'.split(" "))
+    subprocess.check_output('chmod 640 /etc/shadow'.split(" "))
+    subprocess.check_output('chgrp apache /etc/shadow'.split(" "))
     
     
     with open('/etc/ood/config/ood_portal.yml', 'a')as fid:
@@ -23,5 +23,6 @@ if authenticationType == 'basic':
         fid.write('  - "AuthBasicProvider PAM"\n')
         fid.write('  - "AuthPAMService ood"\n')
         fid.write('  - "Require valid-user"      \n')
-        
+    
+    subprocess.check_output('systemctl restart httpd24-httpd.service'.split(" "))
         

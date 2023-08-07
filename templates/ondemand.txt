@@ -32,7 +32,14 @@ Autoscale = false
         cyclecloud.exports.shared.samba.enabled = false
         cyclecloud.exports.defaults.samba.enabled = false      
         cshared.server.legacy_links_disabled = true
-        ondemand.AuthType = $AuthType
+        ondemand.auth.AuthType = $AuthType
+        ondemand.ssl.SSLType = $SSLType
+        ondemand.ssl.certificateName = $certificateName
+        ondemand.ssl.certificateKeyName = $certificateKeyName
+        ondemand.portal.ip = $PortalIP
+        ondemand.portal.serverName = $PortalName
+
+
 
         [[[cluster-init cyclecloud/ondemand:default]]]
         Optional = false
@@ -224,17 +231,17 @@ Order = 15
 Order = 17
 
     [[parameters Portal]]
-
+        Order = 2
         [[[parameter PortalIP]]]
         ParameterType = String
-        Label = Open OnDemand Portal IP
+        Label = Portal IP
         Description = The private IP address to be assigned to Open OnDemand Potal
         Required = true
         Order = 3
 
         [[[parameter PortalName]]]
         ParameterType = String
-        Label = Open OnDemand Portal Server Name
+        Label = Server Name
         Description = The OnDemand portal server name, ideally the FQDN
         Required = true
         Order = 4
@@ -244,7 +251,7 @@ Order = 17
         [[[parameter About Managed Identity]]]
         HideLabel = true
         Config.Plugin = pico.widget.HtmlTemplateWidget
-        Config.Template = ''' <p> The Managed Identity will be used during configuration to retrieve secrets from the target Azure Ke yVault. 
+        Config.Template = ''' <p> The Managed Identity will be used during configuration to retrieve secrets from the target Azure Key Vault. 
             '''
         Order = 6
 
@@ -253,7 +260,6 @@ Order = 17
         Label = MSI Identity
         Description = The Azure user assigned managed identity to access the Azure Key Vault secret and certificate. Make sure it has 'Get' Permission of the Azure Key vault secret and certificate. The identity will be applied to all nodes.
         Required = true
-        Conditions.Excluded := !UseKeyVault
         Order = 7
 
     [[parameters Authentication]]
@@ -276,6 +282,40 @@ Order = 17
         DefaultValue = basic
         Order = 11
   
+    [[parameters SSL Configuration]]
+        
+        Order = 12
+        [[[parameter About SSL]]]
+        HideLabel = true
+        Config.Plugin = pico.widget.HtmlTemplateWidget
+        Config.Template = ''' <p> Select how to enforce SSL in the portal. The self-signed option can be used for testing, but moving to production, an SSL Cert from a relevant CA must be 
+           configured in the portal and placed in the Azure Key Vault
+            '''
+        Order = 13
+
+        [[[parameter SSLType]]]
+        Label = Authentication Type
+        ParameterType = StringList
+        Config.Label = Type of SSL to be used for Portal
+        Config.Plugin = pico.form.Dropdown
+        Config.Entries := {[Label="Self-signed"; Value="self_signed"], [Label="From Azure Key Vault"; Value="keyvault"]}
+        DefaultValue = basic
+        Order = 14
+
+        [[[parameter certificateName]]]
+        Label = Certificate Name
+        Description = Certificate name in Azure Key Vault
+        DefaultValue = ""
+        Conditions.Excluded := SSLType != "self_signed"
+        Required = SSLType != "self_signed"
+
+        
+        [[[parameter certificateKeyName]]]
+        Label = Certificate Key Name
+        Description = Certificate key name in Azure Key Vault
+        DefaultValue = ""
+        Conditions.Excluded := SSLType != "self_signed"
+        Required = SSLType != "self_signed"
 
 
 [parameters Advanced Settings]
