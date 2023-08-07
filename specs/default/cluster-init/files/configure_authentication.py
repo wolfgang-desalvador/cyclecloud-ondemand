@@ -8,7 +8,7 @@ authenticationType = config['ondemand']['AuthType']
 
 if authenticationType == 'basic':
 
-    subprocess.check_output('sudo yum install mod_authnz_pam'.split(" "))
+    subprocess.check_output('sudo yum -y install mod_authnz_pam'.split(" "))
     subprocess.check_output('sudo cp /usr/lib64/httpd/modules/mod_authnz_pam.so /opt/rh/httpd24/root/usr/lib64/httpd/modules/'.split(" "))
     subprocess.check_output('sudo echo "LoadModule authnz_pam_module modules/mod_authnz_pam.so" > /opt/rh/httpd24/root/etc/httpd/conf.modules.d/55-authnz_pam.conf'.split(" "))
     subprocess.check_output('sudo cp /etc/pam.d/sshd /etc/pam.d/ood'.split(" "))

@@ -5,4 +5,4 @@ PYTHON_INTERPRETER="/opt/cycle/ondemand"
 
 source $PYTHON_INTERPRETER/bin/activate
 
-$PYTHON_INTERPRETER/bin/python $SCRIPT_FOLDER/configure_authentication.py
+$PYTHON_INTERPRETER/bin/python $SCRIPT_FOLDER/../files/configure_authentication.py
