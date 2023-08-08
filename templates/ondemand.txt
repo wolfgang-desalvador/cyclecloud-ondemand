@@ -338,7 +338,7 @@ Order = 17
         ParameterType = StringList
         Config.Label = Type of authentication to use in the portal
         Config.Plugin = pico.form.Dropdown
-        Config.Entries := {[Label="Basic"; Value="basic"], [Label="OIDC AD"; Value="oidc_ad"], [Label="OIDC Dex LDAP"; Value="oidc_ldap"]}
+        Config.Entries := {[Label="Basic"; Value="basic"], [Label="OIDC AD"; Value="oidc_aad"], [Label="OIDC Dex LDAP"; Value="oidc_ldap"]}
         DefaultValue = basic
         Order = 21
 
