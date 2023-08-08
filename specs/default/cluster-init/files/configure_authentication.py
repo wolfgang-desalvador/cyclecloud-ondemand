@@ -1,6 +1,3 @@
-import json
-import subprocess
-
 from utilities import executeCommandList, readOnDemandConfiguration, writeOnDemandConfiguration, getSecretValue, getJetpackConfiguration
 
 config = getJetpackConfiguration()
@@ -115,8 +112,14 @@ elif authenticationType == 'oidc_ldap':
 
     if oidcLDAP['requiresLDAPCert']:
         with open('/etc/ssl/ldap.crt', 'w') as fid:
-            fid.write(getSecretValue(config['keyVaultName'], oidcLDAP['ldapCertName']))
+            fid.write(getSecretValue(config['ondemand']['keyVaultName'], oidcLDAP['ldapCertName']))
 
         onDemandConfiguration['dex']['connectors'][0]['config']['rootCA'] = '/etc/ssl/ldap.crt'
 
     writeOnDemandConfiguration(onDemandConfiguration)
+    
+    executeCommandList([
+        "/opt/ood/ood-portal-generator/sbin/update_ood_portal"
+        "systemctl enable ondemand-dex",
+        "systemctl restart ondemand-dex"
+    ])

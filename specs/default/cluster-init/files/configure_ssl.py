@@ -1,5 +1,4 @@
-import json
-import subprocess
+import shutil
 import datetime
 
 from cryptography import x509
@@ -8,7 +7,7 @@ from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-from utilities import readOnDemandConfiguration, writeOnDemandConfiguration, getSecretValue, getJetpackConfiguration
+from utilities import readOnDemandConfiguration, writeOnDemandConfiguration, getSecretValue, getJetpackConfiguration, executeCommandList
 
 config = getJetpackConfiguration()
 
@@ -55,17 +54,25 @@ if authenticationType == 'self_signed':
     ).not_valid_before(
         datetime.datetime.now(datetime.timezone.utc)
     ).not_valid_after(
-        # Our certificate will be valid for 10 days
-        datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=10)
+        # Our certificate will be valid for 1 year
+        datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=365)
     ).add_extension(
         x509.SubjectAlternativeName([x509.DNSName(config['ondemand']['portal']['serverName'])]),
         critical=False,
     # Sign our certificate with our private key
+    ).add_extension(
+        x509.BasicConstraints(ca=True, path_length=0),
+        critical=False
     ).sign(key, hashes.SHA256())
 
     # Write our certificate out to disk.
     with open("/etc/ssl/ssl-ondemand.crt", "wb") as f:
         f.write(cert.public_bytes(serialization.Encoding.PEM))
+    
+    shutil.copy('/etc/ssl/ssl-ondemand.crt', '/etc/pki/ca-trust/source/anchors')
+    executeCommandList([
+        "update-ca-trust"
+    ])
 
 elif authenticationType == 'keyvault':
     with open('/etc/ssl/ssl-ondemand.crt', 'w') as fid:

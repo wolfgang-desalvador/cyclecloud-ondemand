@@ -11,5 +11,7 @@ $PYTHON_INTERPRETER/bin/python $SCRIPT_FOLDER/../files/add_extra_configuration.p
 
 rm -rf /var/run/ondemand-nginx/*
 
+chmod 600 /etc/ood/config/ood_portal.yml
+
 systemctl enable --now httpd24-httpd
 systemctl restart httpd24-httpd

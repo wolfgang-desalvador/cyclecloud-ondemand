@@ -11,6 +11,7 @@ rm -rf /opt/rh/httpd24/root/etc/httpd/conf.d/
 mkdir -p /ood/etc
 mkdir -p /ood/opt
 mkdir -p /ood/www
+mkdir -p /var/www/
 
 ln -s /ood/etc /etc/ood
 ln -s /ood/opt /opt/ood
