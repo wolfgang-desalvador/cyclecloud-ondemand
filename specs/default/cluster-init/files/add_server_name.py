@@ -1,10 +1,10 @@
 import json
 import subprocess
 
-from utilities import readOnDemandConfiguration, writeOnDemandConfiguration
+from utilities import readOnDemandConfiguration, writeOnDemandConfiguration, getJetpackConfiguration
 
 
-config = json.loads(subprocess.check_output(["/opt/cycle/jetpack/bin/jetpack", "config", "--json"]))
+config = getJetpackConfiguration()
 
 onDemandConfiguration = readOnDemandConfiguration()
 

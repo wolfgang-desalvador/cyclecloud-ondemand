@@ -1,9 +1,11 @@
-import json
-import subprocess
+import yaml
 
-from utilities import concatenateToOnDemandConfiguration
+from utilities import writeOnDemandConfiguration, getJetpackConfiguration, readOnDemandConfiguration
 
+config = getJetpackConfiguration()
 
-config = json.loads(subprocess.check_output(["/opt/cycle/jetpack/bin/jetpack", "config", "--json"]))
+ondemandConfiguration = readOnDemandConfiguration()
 
-concatenateToOnDemandConfiguration(config['ondemand']['portal']['extraConfiguration'])
+ondemandConfiguration.update(yaml.safe_load(config['ondemand']['portal']['extraConfiguration']))
+
+writeOnDemandConfiguration(ondemandConfiguration)

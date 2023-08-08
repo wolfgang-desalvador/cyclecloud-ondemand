@@ -36,6 +36,26 @@ Autoscale = false
         ondemand.auth.oidcAAD.ClientID = $ClientID
         ondemand.auth.oidcAAD.ClientSecretName = $ClientSecretName
         ondemand.auth.oidcAAD.MetadataURL = $MetadataURL
+        ondemand.auth.oidcAAD.oidc_scope = $oidc_scope
+        ondemand.auth.oidcAAD.oidc_remote_user_claim = $oidc_remote_user_claim
+        ondemand.auth.oidc_ldap.ldapHost = $ldapHost
+        ondemand.auth.oidc_ldap.bindDN = $bindDN
+        ondemand.auth.oidc_ldap.ldapBindPWName = $ldapBindPWName
+        ondemand.auth.oidc_ldap.userBaseDN = $userBaseDN
+        ondemand.auth.oidc_ldap.userFilter = $userFilter
+        ondemand.auth.oidc_ldap.userName = $userName
+        ondemand.auth.oidc_ldap.idAttribute = $idAttribute
+        ondemand.auth.oidc_ldap.emailAttribute = $emailAttribute
+        ondemand.auth.oidc_ldap.nameAttribute = $nameAttribute
+        ondemand.auth.oidc_ldap.preferredUsernameAttribute = $preferred_username
+        ondemand.auth.oidc_ldap.groupBaseDN = $groupBaseDN
+        ondemand.auth.oidc_ldap.groupFilter = $groupFilter
+        ondemand.auth.oidc_ldap.groupUserMatcherAttribute = $groupUserMatcherAttribute
+        ondemand.auth.oidc_ldap.groupMatcherAttribute = $groupMatcherAttribute
+        ondemand.auth.oidc_ldap.groupNameAttribute = $groupNameAttribute
+        ondemand.auth.oidc_ldap.requiresLDAPCert = $requiresLDAPCert
+        ondemand.auth.oidc_ldap.ldapCertName = $ldapCertName
+
         ondemand.ssl.SSLType = $SSLType
         ondemand.ssl.certificateName = $certificateName
         ondemand.ssl.certificateKeyName = $certificateKeyName
@@ -318,19 +338,10 @@ Order = 17
         ParameterType = StringList
         Config.Label = Type of authentication to use in the portal
         Config.Plugin = pico.form.Dropdown
-        Config.Entries := {[Label="Basic"; Value="basic"], [Label="OIDC AD"; Value="oidc_ad"]}
+        Config.Entries := {[Label="Basic"; Value="basic"], [Label="OIDC AD"; Value="oidc_ad"], [Label="OIDC Dex LDAP"; Value="oidc_ldap"]}
         DefaultValue = basic
         Order = 21
 
-
-        [[[parameter AuthType]]]
-        Label = Authentication Type
-        ParameterType = StringList
-        Config.Label = Type of authentication to use in the portal
-        Config.Plugin = pico.form.Dropdown
-        Config.Entries := {[Label="Basic"; Value="basic"], [Label="OIDC AAD"; Value="oidc_aad"]}
-        DefaultValue = basic
-        Order = 22
 
         [[[parameter ClientID]]]
         Label = Client ID
@@ -355,17 +366,159 @@ Order = 17
         Conditions.Excluded := AuthType != "oidc_aad"
         Required = AuthType == "oidc_aad"
         Order = 25
-  
+
+        [[[parameter oidc_scope]]]
+        Label = OIDC scope
+        Description = OIDC scope
+        DefaultValue = "openid profile email"
+        Conditions.Excluded := AuthType != "oidc_aad"
+        Required = AuthType == "oidc_aad"
+        Order = 26
+
+        [[[parameter oidc_remote_user_claim]]]
+        Label = OIDC user claim
+        Description = OIDC Remote user claim
+        DefaultValue = "preferred_username"
+        Conditions.Excluded := AuthType != "oidc_aad"
+        Required = AuthType == "oidc_aad"
+        Order = 27
+        
+        [[[parameter ldapHost]]]
+        Label = LDAPS Host
+        Description = LDAPS host in the form hostname:port
+        DefaultValue = ""
+        Conditions.Excluded := AuthType != "oidc_ldap"
+        Required = AuthType == "oidc_ldap"
+        Order = 28
+
+        [[[parameter bindDN]]]
+        Label = Bind DN
+        Description = LDAPS read only bind service account 
+        DefaultValue = "cn=read_only_user,dc=example,dc=org"
+        Conditions.Excluded := AuthType != "oidc_ldap"
+        Required = AuthType == "oidc_ldap"
+        Order = 29
+
+        [[[parameter ldapBindPWName]]]
+        Label = LDAPS Bind PWD Name
+        Description = Bind account password secret name in Azure Key Vault
+        DefaultValue = ""
+        Conditions.Excluded := AuthType != "oidc_ldap"
+        Required = AuthType == "oidc_ldap"
+        Order = 30
+
+
+        [[[parameter userBaseDN]]]
+        Label = User BaseDN
+        DefaultValue = "ou=People,dc=example,dc=org"
+        Conditions.Excluded := AuthType != "oidc_ldap"
+        Required = AuthType == "oidc_ldap"
+        Order = 31
+
+        [[[parameter userFilter]]]
+        Label = User Filter
+        DefaultValue = "(objectClass=posixAccount)"
+        Conditions.Excluded := AuthType != "oidc_ldap"
+        Required = AuthType == "oidc_ldap"
+        Order = 32
+
+
+        [[[parameter userName]]]
+        Label = Username attribute 
+        DefaultValue = "sAMAccountName"
+        Conditions.Excluded := AuthType != "oidc_ldap"
+        Required = AuthType == "oidc_ldap"
+        Order = 33
+
+        
+        [[[parameter idAttribute]]]
+        Label = ID attribute 
+        DefaultValue = "uidNumber"
+        Conditions.Excluded := AuthType != "oidc_ldap"
+        Required = AuthType == "oidc_ldap"
+        Order = 34
+
+        [[[parameter emailAttribute]]]
+        Label = Email attribute 
+        DefaultValue = "email"
+        Conditions.Excluded := AuthType != "oidc_ldap"
+        Required = AuthType == "oidc_ldap"
+        Order = 35
+
+        [[[parameter nameAttribute]]]
+        Label = Name Attribute
+        DefaultValue = "givenName"
+        Conditions.Excluded := AuthType != "oidc_ldap"
+        Required = AuthType == "oidc_ldap"
+        Order = 36
+
+        [[[parameter preferredUsernameAttribute]]]
+        Label = Preferred Username Attribute
+        DefaultValue = "sAMAccountName"
+        Conditions.Excluded := AuthType != "oidc_ldap"
+        Required = AuthType == "oidc_ldap"
+        Order = 37
+
+        [[[parameter groupBaseDN]]]
+        Label = Group BaseDN
+        DefaultValue = "ou=Groups,dc=example,dc=org"
+        Conditions.Excluded := AuthType != "oidc_ldap"
+        Required = AuthType == "oidc_ldap"
+        Order = 38
+
+        [[[parameter groupFilter]]]
+        Label = Group Filter
+        DefaultValue = "(objectClass=posixGroup)"
+        Conditions.Excluded := AuthType != "oidc_ldap"
+        Required = AuthType == "oidc_ldap"
+        Order = 39
+
+        [[[parameter groupUserMatcherAttribute]]]
+        Label = Group User Matcher Attribute
+        DefaultValue = "DN"
+        Conditions.Excluded := AuthType != "oidc_ldap"
+        Required = AuthType == "oidc_ldap"
+        Order = 40
+
+        [[[parameter groupMatcherAttribute]]]
+        Label = Group Matcher Attribute
+        DefaultValue = "member"
+        Conditions.Excluded := AuthType != "oidc_ldap"
+        Required = AuthType == "oidc_ldap"
+        Order = 41
+
+        [[[parameter groupNameAttribute]]]
+        Label = Group Name  Attribute
+        DefaultValue = "cn"
+        Conditions.Excluded := AuthType != "oidc_ldap"
+        Required = AuthType == "oidc_ldap"
+        Order = 42
+
+        [[[parameter requiresLDAPCert]]]
+        DefaultValue = false
+        Widget.Plugin = pico.form.BooleanCheckBox
+        Widget.Label = Requires LDAP Cert
+        Conditions.Excluded := AuthType != "oidc_ldap"
+        Order = 43
+
+        [[[parameter ldapCertName]]]
+        Label = LDAP Certificate Name
+        Description = LDAP Certificate Secret name in Azure Key Vault
+        DefaultValue = ""
+        Conditions.Hidden := requiresLDAPCert is false
+        Conditions.Excluded := AuthType != "oidc_ldap"
+         Order = 44
+
     [[parameters SSL Configuration]]
         
-        Order = 32
+        Order = 43
         [[[parameter About SSL]]]
         HideLabel = true
         Config.Plugin = pico.widget.HtmlTemplateWidget
         Config.Template = ''' <p> Select how to enforce SSL in the portal. The self-signed option can be used for testing, but moving to production, an SSL Cert from a relevant CA must be 
            configured in the portal and placed in the Azure Key Vault
             '''
-        Order = 33
+        Order = 44
 
         [[[parameter SSLType]]]
         Label = SSL Type
@@ -374,7 +527,7 @@ Order = 17
         Config.Plugin = pico.form.Dropdown
         Config.Entries := {[Label="Self-signed"; Value="self_signed"], [Label="From Azure Key Vault"; Value="keyvault"]}
         DefaultValue = self_signed
-        Order = 34
+        Order = 45
 
         [[[parameter certificateName]]]
         Label = Certificate Name
@@ -382,7 +535,7 @@ Order = 17
         DefaultValue = ""
         Conditions.Excluded := SSLType == "self_signed"
         Required = SSLType != "self_signed"
-
+        Order = 46
         
         [[[parameter certificateKeyName]]]
         Label = Certificate Key Name
@@ -390,7 +543,7 @@ Order = 17
         DefaultValue = ""
         Conditions.Excluded := SSLType == "self_signed"
         Required = SSLType != "self_signed"
-
+        Order = 47
 
 [parameters Scheduler]
 Order = 18

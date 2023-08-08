@@ -6,11 +6,15 @@ PYTHON_INTERPRETER="/opt/cycle/ondemand"
 setenforce 0
 systemctl disable --now firewalld
 
+rm -rf /opt/rh/httpd24/root/etc/httpd/conf.d/
+
 mkdir -p /ood/etc
 mkdir -p /ood/opt
+mkdir -p /ood/www
 
 ln -s /ood/etc /etc/ood
 ln -s /ood/opt /opt/ood
+ln -s /ood/www /var/www/ood
 
 yum install -y centos-release-scl epel-release
 

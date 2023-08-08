@@ -8,10 +8,9 @@ from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-from utilities import readOnDemandConfiguration, writeOnDemandConfiguration, getSecretValue
+from utilities import readOnDemandConfiguration, writeOnDemandConfiguration, getSecretValue, getJetpackConfiguration
 
-
-config = json.loads(subprocess.check_output(["/opt/cycle/jetpack/bin/jetpack", "config", "--json"]))
+config = getJetpackConfiguration()
 
 authenticationType = config['ondemand']['ssl']['SSLType']
 
