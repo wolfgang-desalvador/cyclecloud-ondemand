@@ -1,6 +1,3 @@
-import json
-import subprocess
-
 from utilities import readOnDemandConfiguration, writeOnDemandConfiguration, getJetpackConfiguration
 
 
