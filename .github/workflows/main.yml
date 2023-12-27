@@ -37,7 +37,7 @@ jobs:
           draft: false
           prerelease: true
 
-       - name: Upload Slurm install packages;
+      - name: Upload Slurm install packages;
         id: upload-1
         uses: actions/upload-release-asset@v1
         env:
