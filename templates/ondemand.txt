@@ -205,12 +205,12 @@ Order = 15
 
 
 
-    [[parameters Default NFS Share]]
+    [[parameters Shared Mount]]
     Order = 10
         [[[parameter About shared]]]
         HideLabel = true
         Config.Plugin = pico.widget.HtmlTemplateWidget
-        Config.Template := "<p>The directory <code>/shared</code> is a network attached mount and exists in all nodes of the cluster. Users' home directories reside within this mountpoint with the base homedir <code>/shared/home</code>.<br><br>There are two options for providing this mount:<br> <strong>[Builtin]</strong>: The scheduler node is an NFS server that provides the mountpoint to the other nodes of the cluster.<br> <strong>[External NFS]</strong>: A network attached storage such as Azure Netapp Files, HPC Cache, or another VM running an NFS server, provides the mountpoint.</p><p>Note: the cluster must be terminated for this to take effect.</p>"
+        Config.Template := "<p>The directory <code>/shared</code> is a network attached mount and exists in all nodes of the cluster. Users' home directories reside within this mountpoint with the base homedir <code>/shared/home</code>.<br><br></p>"
         Order = 20
 
         [[[parameter NFSType]]]
@@ -220,12 +220,7 @@ Order = 15
         Config.Plugin = pico.form.Dropdown
         Config.Entries := {[Label="External NFS"; Value="External"]}
         DefaultValue = External
-    
-	[[[parameter NFSDiskWarning]]]
-	HideLabel = true
-        Config.Plugin = pico.widget.HtmlTemplateWidget
-        Config.Template := "<p><b>Warning</b>: switching an active cluster over to NFS will delete the shared disk.</p>"
-        Conditions.Hidden := NFSType != "External"
+        Conditions.Hidden := true
 
         [[[parameter NFSAddress]]]
         Label = NFS IP Address
@@ -589,7 +584,7 @@ Order = 18
         ParameterType = StringList
         Config.Label = Version of the scheduler
         Config.Plugin = pico.form.Dropdown
-        Config.Entries := {[Label="18.1.4 (only el7)"; Value="18.1.4"], [Label="2.0.1 (only el8)"; Value="20.0.1"], [Label="22.05.11 (only el8)"; Value="22.05.11"]}
+        Config.Entries := {[Label="18.1.4 (only el7)"; Value="18.1.4"], [Label="20.0.1 (only el8)"; Value="20.0.1"], [Label="22.05.11 (only el8)"; Value="22.05.11"]}
         Conditions.Excluded := schedulerType == "slurm"
         DefaultValue = 18.1.4
 
