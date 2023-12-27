@@ -4,8 +4,11 @@ from utilities import writeOnDemandConfiguration, getJetpackConfiguration, readO
 
 config = getJetpackConfiguration()
 
-ondemandConfiguration = readOnDemandConfiguration()
+extraConfiguration = config['ondemand']['portal']['extraConfiguration']
 
-ondemandConfiguration.update(yaml.safe_load(config['ondemand']['portal']['extraConfiguration']))
+if extraConfiguration:
+    ondemandConfiguration = readOnDemandConfiguration()
 
-writeOnDemandConfiguration(ondemandConfiguration)
+    ondemandConfiguration.update(yaml.safe_load(config['ondemand']['portal']['extraConfiguration']))
+
+    writeOnDemandConfiguration(ondemandConfiguration)

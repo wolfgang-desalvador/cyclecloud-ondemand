@@ -5,14 +5,21 @@ import json
 from azure.keyvault.secrets import SecretClient
 from azure.identity import DefaultAzureCredential
 
+from constants import OOD_CONFIG_PATH
+
 
 def executeCommandList(commandList):   
     for command in commandList:
         subprocess.check_output(command.split(" "))
 
+def getOutputFromCommand(command):   
+    return subprocess.check_output(command.split(" "))
+
+def getRHELVersion():
+    return getOutputFromCommand("lsb_release -rs | cut -f1 -d.")
 
 def readOnDemandConfiguration():
-    with open('/etc/ood/config/ood_portal.yml', 'r') as fid:
+    with open(OOD_CONFIG_PATH, 'r') as fid:
         onDemandConfiguration = yaml.load(fid, Loader=yaml.Loader)  
     
     if onDemandConfiguration is None:
@@ -22,7 +29,7 @@ def readOnDemandConfiguration():
 
 
 def writeOnDemandConfiguration(configuration):
-    with open('/etc/ood/config/ood_portal.yml', 'w') as fid:
+    with open(OOD_CONFIG_PATH, 'w') as fid:
         yaml.dump(configuration, fid)
 
 
@@ -35,10 +42,15 @@ def getSecretValue(keyVaultName, secretName):
 
 
 def concatenateToOnDemandConfiguration(configuration):
-    with open('/etc/ood/config/ood_portal.yml', 'a') as fid:
+    with open(OOD_CONFIG_PATH, 'a') as fid:
         for line in configuration:
             fid.write(line)
 
+def createUserAndGroup(name, UID, GID):
+    executeCommandList([
+        "groupadd -g {} {}".format(GID, name),
+        "useradd -u {} -g {} {}".format(UID, GID, name)
+    ])
 
 def getJetpackConfiguration():
     return json.loads(subprocess.check_output(["/opt/cycle/jetpack/bin/jetpack", "config", "--json"]))

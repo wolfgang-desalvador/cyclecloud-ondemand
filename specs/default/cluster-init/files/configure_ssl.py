@@ -8,6 +8,8 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
 from utilities import readOnDemandConfiguration, writeOnDemandConfiguration, getSecretValue, getJetpackConfiguration, executeCommandList
+from constants import OOD_CERT_LOCATION, OOD_KEY_LOCATION
+
 
 config = getJetpackConfiguration()
 
@@ -16,8 +18,8 @@ authenticationType = config['ondemand']['ssl']['SSLType']
 onDemandConfiguration = readOnDemandConfiguration()
 
 onDemandConfiguration['ssl'] = [
-    'SSLCertificateFile "/etc/ssl/ssl-ondemand.crt"',
-    'SSLCertificateKeyFile "/etc/ssl/ssl-ondemand.key"'
+    'SSLCertificateFile "{}"'.format(OOD_CERT_LOCATION),
+    'SSLCertificateKeyFile "{}"'.format(OOD_KEY_LOCATION)
 ]
 
 writeOnDemandConfiguration(onDemandConfiguration)
@@ -30,7 +32,7 @@ if authenticationType == 'self_signed':
         key_size=2048,
     )
 
-    with open("/etc/ssl/ssl-ondemand.key", "wb") as f:
+    with open(OOD_KEY_LOCATION, "wb") as f:
         f.write(key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.TraditionalOpenSSL,
@@ -66,17 +68,17 @@ if authenticationType == 'self_signed':
     ).sign(key, hashes.SHA256())
 
     # Write our certificate out to disk.
-    with open("/etc/ssl/ssl-ondemand.crt", "wb") as f:
+    with open(OOD_CERT_LOCATION, "wb") as f:
         f.write(cert.public_bytes(serialization.Encoding.PEM))
     
-    shutil.copy('/etc/ssl/ssl-ondemand.crt', '/etc/pki/ca-trust/source/anchors')
+    shutil.copy(OOD_CERT_LOCATION, '/etc/pki/ca-trust/source/anchors')
     executeCommandList([
         "update-ca-trust"
     ])
 
 elif authenticationType == 'keyvault':
-    with open('/etc/ssl/ssl-ondemand.crt', 'w') as fid:
+    with open(OOD_CERT_LOCATION, 'w') as fid:
         fid.write(getSecretValue(config['keyVaultName'], config['ssl']['certficateName']))
 
-    with open('/etc/ssl/ssl-ondemand.key', 'w') as fid:
+    with open(OOD_KEY_LOCATION, 'w') as fid:
         fid.write(getSecretValue(config['keyVaultName'], config['ssl']['certficateKeyName']))

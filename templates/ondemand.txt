@@ -64,7 +64,13 @@ Autoscale = false
         ondemand.portal.extraConfiguration = $extraConfiguration
         ondemand.scheduler.type = $schedulerType
         ondemand.scheduler.host = $schedulerHost
-        ondemand.scheduler.version = $schedulerVersion
+        ondemand.scheduler.pbsVersion = $pbsSchedulerVersion
+        ondemand.scheduler.slurmVersion = $slurmSchedulerVersion
+        ondemand.scheduler.slurmUID = 11100
+        ondemand.scheduler.slurmGID = 11100
+        ondemand.scheduler.mungeUID = 11101
+        ondemand.scheduler.mungeGID = 11101
+        ondemand.slurmClusterName = $slurmClusterName
         ondemand.keyVaultName = $AzureKeyVaultName
 
         [[[cluster-init cyclecloud/ondemand:default]]]
@@ -80,7 +86,9 @@ Autoscale = false
         [[[configuration cyclecloud.mounts.nfs_sched]]]
         type = nfs
         mountpoint = /sched
-        disabled = $NFSSchedDisable
+        export_path = $NFSSchedExportPath
+        address = $NFSSchedAddress
+        options = $NFSSchedMountOptions
 
         [[[configuration cyclecloud.mounts.additional_nfs]]]
         disabled = ${AdditionalNAS isnt true}
@@ -97,7 +105,7 @@ Autoscale = false
     AdditionalClusterInitSpecs = $serverClusterInitSpecs
     
         [[[configuration]]]
-        cyclecloud.mounts.nfs_sched.disabled = true
+        cyclecloud.mounts.nfs_sched.disabled = false
         cyclecloud.mounts.nfs_shared.disabled = false
         
         [[[network-interface eth0]]]
@@ -181,11 +189,21 @@ Order = 15
             To disable the mount of the /sched directory, and to supply your own for a <strong>hybrid scenario</strong>, select the checkbox below.'''
         Order = 6
 
-        [[[parameter NFSSchedDisable]]]
-        HideLabel = true
-        DefaultValue = false
-        Widget.Plugin = pico.form.BooleanCheckBox
-        Widget.Label = External Scheduler
+        [[[parameter NFSSchedAddress]]]
+        Label = NFS IP Address
+        Description = The IP address or hostname of the NFS server. Also accepts a list comma-separated addresses, for example, to mount a frontend load-balanced Azure HPC Cache.
+        Config.ParameterType = String
+
+        [[[parameter NFSSharedExportPath]]]
+        Label = Sched Export Path
+        Description = The path exported by the file system
+        DefaultValue = /sched
+
+        [[[parameter NFSSchedMountOptions]]]
+        Label = NFS Mount Options
+        Description = NFS Client Mount Options
+
+
 
     [[parameters Default NFS Share]]
     Order = 10
@@ -202,7 +220,7 @@ Order = 15
         Config.Plugin = pico.form.Dropdown
         Config.Entries := {[Label="External NFS"; Value="External"]}
         DefaultValue = External
-
+    
 	[[[parameter NFSDiskWarning]]]
 	HideLabel = true
         Config.Plugin = pico.widget.HtmlTemplateWidget
@@ -556,7 +574,7 @@ Order = 18
         ParameterType = StringList
         Config.Label = Type of the scheduler
         Config.Plugin = pico.form.Dropdown
-        Config.Entries := {[Label="OpenPBS"; Value="pbs"]}
+        Config.Entries := {[Label="OpenPBS"; Value="pbs"], [Label="Slurm"; Value="slurm"]}
         DefaultValue = pbs
 
         [[[parameter schedulerHost]]]
@@ -566,13 +584,30 @@ Order = 18
         Required = true
         Order = 14
 
-        [[[parameter schedulerVersion]]]
+        [[[parameter pbsSchedulerVersion]]]
         Label = Scheduler Version
         ParameterType = StringList
         Config.Label = Version of the scheduler
         Config.Plugin = pico.form.Dropdown
-        Config.Entries := {[Label="18.1.4"; Value="18.1.4"]}
+        Config.Entries := {[Label="18.1.4 (only el7)"; Value="18.1.4"], [Label="2.0.1 (only el8)"; Value="20.0.1"], [Label="22.05.11 (only el8)"; Value="22.05.11"]}
+        Conditions.Excluded := schedulerType == "slurm"
         DefaultValue = 18.1.4
+
+        [[[parameter slurmSchedulerVersion]]]
+        Label = Scheduler Version
+        ParameterType = StringList
+        Config.Label = Version of the scheduler
+        Config.Plugin = pico.form.Dropdown
+        Conditions.Excluded := schedulerType == "pbs"
+        Config.Entries := {[Label="22.05.10"; Value="22.05.10"], [Label="23.02.6"; Value="23.02.6"]}
+        DefaultValue = 22.05.10
+
+        [[[parameter slurmClusterName]]]
+        Label = Slurm Cluster Name
+        ParameterType = String
+        Description = Slurm Cluster Name as reported in Azure CycleCloud
+        Conditions.Excluded := schedulerType == "pbs"
+
 
 [parameters Advanced Settings]
 Order = 20
@@ -594,7 +629,7 @@ Order = 20
         ParameterType = Cloud.Image
         Config.OS = linux
         DefaultValue = OpenLogic:CentOS-HPC:7_9-gen2:7.9.2022040101
-        Config.Filter := Package in {"OpenLogic:CentOS-HPC:7_9-gen2:7.9.2022040101"}
+        Config.Filter := Package in {"OpenLogic:CentOS-HPC:7_9-gen2:7.9.2022040101", "almalinux8"}
 
         [[[parameter serverClusterInitSpecs]]]
         Label = Server Cluster-Init

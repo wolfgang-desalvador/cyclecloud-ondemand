@@ -6,29 +6,48 @@ PYTHON_INTERPRETER="/opt/cycle/ondemand"
 setenforce 0
 systemctl disable --now firewalld
 
-rm -rf /opt/rh/httpd24/root/etc/httpd/conf.d/
+yum install -y redhat-lsb
 
-mkdir -p /ood/etc
-mkdir -p /ood/opt
-mkdir -p /ood/www
-mkdir -p /var/www/
+if [ $(lsb_release -rs | cut -f1 -d.) == 7]; then
 
-ln -s /ood/etc /etc/ood
-ln -s /ood/opt /opt/ood
-ln -s /ood/www /var/www/ood
+    rm -rf /opt/rh/httpd24/root/etc/httpd/conf.d/
 
-yum install -y centos-release-scl epel-release
+    mkdir -p /ood/etc
+    mkdir -p /ood/opt
+    mkdir -p /ood/www
+    mkdir -p /var/www/
 
-yum install -y https://yum.osc.edu/ondemand/3.0/ondemand-release-web-3.0-1.noarch.rpm
+    ln -s /ood/etc /etc/ood
+    ln -s /ood/opt /opt/ood
+    ln -s /ood/www /var/www/ood
 
-yum install -y ondemand
+    yum install -y centos-release-scl epel-release
 
-yum install -y python3
+    yum install -y https://yum.osc.edu/ondemand/3.0/ondemand-release-web-3.0-1.noarch.rpm
 
-yum install -y ondemand-dex
+    yum install -y ondemand
 
-systemctl start httpd24-httpd
-systemctl enable httpd24-httpd
+    yum install -y python3
+
+    yum install -y ondemand-dex
+
+    systemctl start httpd24-httpd
+    systemctl enable httpd24-httpd
+
+
+elif [ $(lsb_release -rs | cut -f1 -d.) == 8] ; then
+
+
+    dnf config-manager --set-enabled powertools
+    dnf install epel-release -y
+    dnf module enable ruby:3.0 nodejs:14
+    yum install https://yum.osc.edu/ondemand/3.0/ondemand-release-web-3.0-1.noarch.rpm -y
+
+    yum install ondemand -y
+    sudo systemctl start httpd
+    sudo systemctl enable httpd
+
+fi
 
 /usr/bin/python3 -m venv ondemand $PYTHON_INTERPRETER
 source $PYTHON_INTERPRETER/bin/activate
