@@ -18,7 +18,7 @@ if authenticationType == 'basic':
         executeCommandList([
             "yum -y install mod_authnz_pam",
             "cp /usr/lib64/httpd/modules/mod_authnz_pam.so /opt/rh/httpd24/root/usr/lib64/httpd/modules/",
-            "echo ""LoadModule authnz_pam_module modules/mod_authnz_pam.so"" > /opt/rh/httpd24/root/etc/httpd/conf.modules.d/55-authnz_pam.conf",
+            "echo 'LoadModule authnz_pam_module modules/mod_authnz_pam.so' > /opt/rh/httpd24/root/etc/httpd/conf.modules.d/55-authnz_pam.conf",
             "cp /etc/pam.d/sshd /etc/pam.d/ood",
             "chmod 640 /etc/shadow",
             "chgrp apache /etc/shadow"
@@ -27,7 +27,7 @@ if authenticationType == 'basic':
     elif osVersion == "8":
         executeCommandList([
             "yum -y install mod_authnz_pam",
-            "sudo echo ""LoadModule authnz_pam_module modules/mod_authnz_pam.so"" > /etc/httpd/conf.modules.d/55-authnz_pam.conf",
+            "echo 'LoadModule authnz_pam_module modules/mod_authnz_pam.so' > /etc/httpd/conf.modules.d/55-authnz_pam.conf",
             "cp /etc/pam.d/sshd /etc/pam.d/ood",
             "chmod 640 /etc/shadow",
             "chgrp apache /etc/shadow"

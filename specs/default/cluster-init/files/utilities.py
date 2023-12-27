@@ -18,7 +18,7 @@ def getOutputFromCommand(command):
 
 
 def getRHELVersion():
-    return getOutputFromCommand("lsb_release -rs")[0].decode()
+    return str(getOutputFromCommand("lsb_release -rs").decode()[0])
 
 
 def readOnDemandConfiguration():
