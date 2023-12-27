@@ -8,7 +8,7 @@ systemctl disable --now firewalld
 
 yum install -y redhat-lsb
 
-if [ $(lsb_release -rs | cut -f1 -d.) == 7]; then
+if [ $(lsb_release -rs | cut -f1 -d.) == 7 ]; then
 
     rm -rf /opt/rh/httpd24/root/etc/httpd/conf.d/
 
@@ -35,7 +35,7 @@ if [ $(lsb_release -rs | cut -f1 -d.) == 7]; then
     systemctl enable httpd24-httpd
 
 
-elif [ $(lsb_release -rs | cut -f1 -d.) == 8] ; then
+elif [ $(lsb_release -rs | cut -f1 -d.) == 8 ] ; then
 
 
     dnf config-manager --set-enabled powertools
