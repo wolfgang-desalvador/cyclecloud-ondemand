@@ -18,6 +18,7 @@ if authenticationType == 'basic':
         executeCommandList([
             "yum -y install mod_authnz_pam",
             "cp /usr/lib64/httpd/modules/mod_authnz_pam.so /opt/rh/httpd24/root/usr/lib64/httpd/modules/",
+            "mkdir -p /opt/rh/httpd24/root/etc/httpd/conf.modules.d/",
             "echo 'LoadModule authnz_pam_module modules/mod_authnz_pam.so' > /opt/rh/httpd24/root/etc/httpd/conf.modules.d/55-authnz_pam.conf",
             "cp /etc/pam.d/sshd /etc/pam.d/ood",
             "chmod 640 /etc/shadow",
@@ -27,6 +28,7 @@ if authenticationType == 'basic':
     elif osVersion == "8":
         executeCommandList([
             "yum -y install mod_authnz_pam",
+            "mkdir -p /etc/httpd/conf.modules.d/",
             "echo 'LoadModule authnz_pam_module modules/mod_authnz_pam.so' > /etc/httpd/conf.modules.d/55-authnz_pam.conf",
             "cp /etc/pam.d/sshd /etc/pam.d/ood",
             "chmod 640 /etc/shadow",
@@ -42,7 +44,7 @@ if authenticationType == 'basic':
 
     onDemandConfiguration['auth'] = [
         "AuthType Basic",
-        "AuthName ""Open OnDemand""",
+        "AuthName 'Open OnDemand'",
         "AuthBasicProvider PAM",
         "AuthPAMService ood",
         "Require valid-user"
