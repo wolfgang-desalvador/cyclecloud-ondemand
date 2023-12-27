@@ -41,7 +41,7 @@ elif [ $(lsb_release -rs | cut -f1 -d.) == 8 ]; then
     echo "Installing OnDemand using RHEL 8 recipes"
     dnf config-manager --set-enabled powertools
     dnf install epel-release -y
-    dnf module enable ruby:3.0 nodejs:14
+    dnf module enable ruby:3.0 nodejs:14 -y
     yum install https://yum.osc.edu/ondemand/3.0/ondemand-release-web-3.0-1.noarch.rpm -y
     yum install -y ondemand-dex
     yum install ondemand -y
