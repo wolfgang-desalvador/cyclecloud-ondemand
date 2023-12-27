@@ -19,21 +19,25 @@ if authenticationType == 'basic':
             "yum -y install mod_authnz_pam",
             "cp /usr/lib64/httpd/modules/mod_authnz_pam.so /opt/rh/httpd24/root/usr/lib64/httpd/modules/",
             "mkdir -p /opt/rh/httpd24/root/etc/httpd/conf.modules.d/",
-            "echo 'LoadModule authnz_pam_module modules/mod_authnz_pam.so' > /opt/rh/httpd24/root/etc/httpd/conf.modules.d/55-authnz_pam.conf",
             "cp /etc/pam.d/sshd /etc/pam.d/ood",
             "chmod 640 /etc/shadow",
             "chgrp apache /etc/shadow"
         ])
+
+        with open('/opt/rh/httpd24/root/etc/httpd/conf.modules.d/55-authnz_pam.conf', 'w') as fid:
+            fid.write('LoadModule authnz_pam_module modules/mod_authnz_pam.so')
         
     elif osVersion == "8":
         executeCommandList([
             "yum -y install mod_authnz_pam",
             "mkdir -p /etc/httpd/conf.modules.d/",
-            "echo 'LoadModule authnz_pam_module modules/mod_authnz_pam.so' > /etc/httpd/conf.modules.d/55-authnz_pam.conf",
             "cp /etc/pam.d/sshd /etc/pam.d/ood",
             "chmod 640 /etc/shadow",
             "chgrp apache /etc/shadow"
         ])
+
+        with open('/etc/httpd/conf.modules.d/55-authnz_pam.conf', 'w') as fid:
+            fid.write('LoadModule authnz_pam_module modules/mod_authnz_pam.so')
     else:
         OnDemandCycleCloudLogger.error('Unsupported OS in the configuration. Exiting...')
         sys.exit(1)
