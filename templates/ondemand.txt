@@ -194,7 +194,7 @@ Order = 15
         Description = The IP address or hostname of the NFS server. Also accepts a list comma-separated addresses, for example, to mount a frontend load-balanced Azure HPC Cache.
         Config.ParameterType = String
 
-        [[[parameter NFSSharedExportPath]]]
+        [[[parameter NFSSchedExportPath]]]
         Label = Sched Export Path
         Description = The path exported by the file system
         DefaultValue = /sched
