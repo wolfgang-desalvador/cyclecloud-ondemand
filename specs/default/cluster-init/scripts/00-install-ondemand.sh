@@ -43,7 +43,7 @@ elif [ $(lsb_release -rs | cut -f1 -d.) == 8 ]; then
     dnf install epel-release -y
     dnf module enable ruby:3.0 nodejs:14
     yum install https://yum.osc.edu/ondemand/3.0/ondemand-release-web-3.0-1.noarch.rpm -y
-
+    yum install -y ondemand-dex
     yum install ondemand -y
     sudo systemctl start httpd
     sudo systemctl enable httpd

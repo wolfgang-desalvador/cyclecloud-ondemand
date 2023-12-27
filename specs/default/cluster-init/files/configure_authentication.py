@@ -1,11 +1,13 @@
+import sys
+
 from utilities import  getRHELVersion, executeCommandList, readOnDemandConfiguration, writeOnDemandConfiguration, getSecretValue, getJetpackConfiguration
 from constants import OOD_CONFIG_PATH
 from logger import OnDemandCycleCloudLogger
 
+
 config = getJetpackConfiguration()
 
 authenticationType = config['ondemand']['auth']['AuthType']
-
 OnDemandCycleCloudLogger.debug('The selected authentication type is {}'.format(authenticationType))
 
 if authenticationType == 'basic':
@@ -30,6 +32,9 @@ if authenticationType == 'basic':
             "chmod 640 /etc/shadow",
             "chgrp apache /etc/shadow"
         ])
+    else:
+        OnDemandCycleCloudLogger.error('Unsupported OS in the configuration. Exiting...')
+        sys.exit(1)
 
     onDemandConfiguration = readOnDemandConfiguration()
 

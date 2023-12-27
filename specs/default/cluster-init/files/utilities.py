@@ -12,11 +12,14 @@ def executeCommandList(commandList):
     for command in commandList:
         subprocess.check_output(command.split(" "))
 
+
 def getOutputFromCommand(command):   
     return subprocess.check_output(command.split(" "))
 
+
 def getRHELVersion():
-    return str(getOutputFromCommand("lsb_release -rs")[0])
+    return getOutputFromCommand("lsb_release -rs")[0].decode()
+
 
 def readOnDemandConfiguration():
     with open(OOD_CONFIG_PATH, 'r') as fid:
