@@ -1,13 +1,17 @@
 from utilities import  getRHELVersion, executeCommandList, readOnDemandConfiguration, writeOnDemandConfiguration, getSecretValue, getJetpackConfiguration
+from constants import OOD_CONFIG_PATH
+from logger import OnDemandCycleCloudLogger
 
 config = getJetpackConfiguration()
 
 authenticationType = config['ondemand']['auth']['AuthType']
 
+OnDemandCycleCloudLogger.debug('The selected authentication type is {}'.format(authenticationType))
 
 if authenticationType == 'basic':
     osVersion = getRHELVersion()
 
+    OnDemandCycleCloudLogger.debug('The selected OS Version is {}'.format(osVersion))
     if osVersion == "7":
         executeCommandList([
             "yum -y install mod_authnz_pam",
@@ -28,6 +32,8 @@ if authenticationType == 'basic':
         ])
 
     onDemandConfiguration = readOnDemandConfiguration()
+
+    OnDemandCycleCloudLogger.debug('Writing basic authentication configuration to {}'.format(OOD_CONFIG_PATH))
 
     onDemandConfiguration['auth'] = [
         "AuthType Basic",

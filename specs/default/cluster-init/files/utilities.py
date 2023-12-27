@@ -16,7 +16,7 @@ def getOutputFromCommand(command):
     return subprocess.check_output(command.split(" "))
 
 def getRHELVersion():
-    return getOutputFromCommand("lsb_release -rs")[0]
+    return str(getOutputFromCommand("lsb_release -rs")[0])
 
 def readOnDemandConfiguration():
     with open(OOD_CONFIG_PATH, 'r') as fid:

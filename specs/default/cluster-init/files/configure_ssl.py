@@ -10,7 +10,6 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from utilities import readOnDemandConfiguration, writeOnDemandConfiguration, getSecretValue, getJetpackConfiguration, executeCommandList
 from constants import OOD_CERT_LOCATION, OOD_KEY_LOCATION
 
-
 config = getJetpackConfiguration()
 
 authenticationType = config['ondemand']['ssl']['SSLType']

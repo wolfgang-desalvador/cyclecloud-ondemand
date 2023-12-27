@@ -10,6 +10,7 @@ yum install -y redhat-lsb
 
 if [ $(lsb_release -rs | cut -f1 -d.) == 7 ]; then
 
+    echo "Installing OnDemand using RHEL 7 recipes"
     rm -rf /opt/rh/httpd24/root/etc/httpd/conf.d/
 
     mkdir -p /ood/etc
@@ -35,9 +36,9 @@ if [ $(lsb_release -rs | cut -f1 -d.) == 7 ]; then
     systemctl enable httpd24-httpd
 
 
-elif [ $(lsb_release -rs | cut -f1 -d.) == 8 ] ; then
+elif [ $(lsb_release -rs | cut -f1 -d.) == 8 ]; then
 
-
+    echo "Installing OnDemand using RHEL 8 recipes"
     dnf config-manager --set-enabled powertools
     dnf install epel-release -y
     dnf module enable ruby:3.0 nodejs:14
