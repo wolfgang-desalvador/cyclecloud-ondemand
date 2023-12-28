@@ -391,7 +391,6 @@ class OpenOnDemandInstaller():
         with open(CONFIGURATION_COMPLETED, 'w') as fid:
             fid.write('Configuration completed!')
 
-
     def installPortal(self):
         if self.osVersion == "7":
             executeCommandList([
@@ -439,6 +438,7 @@ class OpenOnDemandInstaller():
                 "systemctl restart httpd",
                 "systemctl enable httpd",
             ])
+
 
 if __name__ == '__main__':
     installer = OpenOnDemandInstaller()
