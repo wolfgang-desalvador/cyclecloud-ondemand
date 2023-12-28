@@ -396,20 +396,20 @@ class OpenOnDemandInstaller():
         if self.osVersion == "7":
             self.logger.debug("Executing recipe for RHEL 7")
             executeCommandList([
-                "rm -rf /opt/rh/httpd24/root/etc/httpd/conf.d/"
-                "mkdir -p /ood/etc"
-                "mkdir -p /ood/opt"
-                "mkdir -p /ood/www"
-                "mkdir -p /var/www/"
-                "ln -s /ood/etc /etc/ood"
-                "ln -s /ood/opt /opt/ood"
-                "ln -s /ood/www /var/www/ood"
-                "yum install -y centos-release-scl epel-release"
-                "yum install -y https://yum.osc.edu/ondemand/3.0/ondemand-release-web-3.0-1.noarch.rpm"
-                "yum install -y ondemand"
-                "yum install -y python3"
-                "yum install -y ondemand-dex"
-                "systemctl start httpd24-httpd"
+                "rm -rf /opt/rh/httpd24/root/etc/httpd/conf.d/",
+                "mkdir -p /ood/etc",
+                "mkdir -p /ood/opt",
+                "mkdir -p /ood/www",
+                "mkdir -p /var/www/",
+                "ln -s /ood/etc /etc/ood",
+                "ln -s /ood/opt /opt/ood",
+                "ln -s /ood/www /var/www/ood",
+                "yum install -y centos-release-scl epel-release",
+                "yum install -y https://yum.osc.edu/ondemand/3.0/ondemand-release-web-3.0-1.noarch.rpm",
+                "yum install -y ondemand",
+                "yum install -y python3",
+                "yum install -y ondemand-dex",
+                "systemctl start httpd24-httpd",
                 "systemctl enable httpd24-httpd"
             ])
         elif self.osVersion == "8":
