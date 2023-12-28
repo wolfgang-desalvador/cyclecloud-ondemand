@@ -297,6 +297,7 @@ class OpenOnDemandInstaller():
             "ln -sf {}/azure.conf /etc/slurm/azure.conf".format(configurationPath),
             "ln -sf {}/keep_alive.conf /etc/slurm/keep_alive.conf".format(configurationPath),
             "ln -sf {}/cgroup.conf /etc/slurm/cgroup.conf".format(configurationPath),
+            "ln -sf {}/accounting.conf /etc/slurm/accounting.conf".format(configurationPath),
         ])
 
         clusterDefinition = {
