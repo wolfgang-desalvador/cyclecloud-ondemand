@@ -326,14 +326,14 @@ Order = 17
         ParameterType = Azure.ManagedIdentity
         Label = MSI Identity
         Description = The Azure user assigned managed identity to access the Azure Key Vault secret and certificate. Make sure it has 'Get' Permission of the Azure Key vault secret and certificate. The identity will be applied to all nodes.
-        Required = true
+        Required = AuthType != "basic" || SSLType != "self_signed"
         Order = 17
 
         [[[parameter AzureKeyVaultName]]]
         ParameterType = String
         Label = Vault Name
         Description = Azure Vault Name containing the secrets
-        Required = true
+        Required = AuthType != "basic" || SSLType != "self_signed"
         Order = 18
 
 
@@ -344,7 +344,16 @@ Order = 17
         HideLabel = true
         Config.Plugin = pico.widget.HtmlTemplateWidget
         Config.Template = ''' <p> Authentication for OnDemand portal can be based on Basic Apache auth (using PAM) or on OIDC. In production, it is strongly suggested to avoid Basic authentication.
-            OIDC authentication can bind to a LDAP server through Dex or directly to an OIDC provider 
+            OIDC authentication can bind to a LDAP server through Dex or directly to an OIDC provider. </p>
+            <p>
+            <strong>[Basic]</strong>: basic authentication using PAM. This is unsecure since requires Apache to own <code> /etc/shadow </code>. Moroever, password must be set for user through <code>passwd</code>
+            </p>
+            <p>
+            <strong>[OIDC AD]</strong>: this configuration will enable SSO through an App Registration in Azure AD
+            </p>
+            <p>
+            <strong>[OIDC Dex LDAP]</strong>: DEX will enable an OIDC authentication flow against an LDAP server
+            </p>
             '''
         Order = 20
 
@@ -532,6 +541,11 @@ Order = 17
         Config.Plugin = pico.widget.HtmlTemplateWidget
         Config.Template = ''' <p> Select how to enforce SSL in the portal. The self-signed option can be used for testing, but moving to production, an SSL Cert from a relevant CA must be 
            configured in the portal and placed in the Azure Key Vault
+            <strong>[Self-Signed]</strong>: A certificate will be generated with a self-generated Certification Authority against the Portal Name specified. This will pop-up unsecure message in browser
+            </p>
+            <p>
+            <strong>[From Azure KeyVault]</strong>: This will pull directly the certificates from the secrets specified in Azure Key Vault
+            </p>
             '''
         Order = 44
 
