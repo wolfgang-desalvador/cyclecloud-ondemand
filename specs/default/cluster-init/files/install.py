@@ -290,7 +290,7 @@ class OpenOnDemandInstaller():
             "systemctl restart munge",
             "jetpack download {} --project ondemand ./".format(SLURM_PACKAGE_NAME),
             "tar -xzf {}".format(SLURM_PACKAGE_NAME),
-            "cd az-slurm-install",
+            "cd azure-slurm-install",
             "cd {}".format(slurmFolder),
             "yum localinstall -y {}".format(slurmBinaryName),
             "ln -sf {}/slurm.conf /etc/slurm/slurm.conf".format(configurationPath),
