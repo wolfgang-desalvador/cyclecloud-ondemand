@@ -275,7 +275,15 @@ class OpenOnDemandInstaller():
 
         executeCommandList([
             "yum install -y munge"
-            "cp -f /sched/*/munge.key /etc/munge/",
+        ])
+
+        if os.path.exists("/sched/{}".format(slurmClusterName)):
+            configurationPath = "/sched/{}".format(slurmClusterName)
+        else:
+            configurationPath = "/sched"
+        
+        executeCommandList([
+            "cp -f {}/munge.key /etc/munge/".format(configurationPath),
             "chown munge:munge /etc/munge/munge.key",
             "chmod 600 /etc/munge/munge.key",
             "systemctl enable munge --now",
@@ -285,11 +293,11 @@ class OpenOnDemandInstaller():
             "cd az-slurm-install",
             "cd {}".format(slurmFolder),
             "yum localinstall -y {}".format(slurmBinaryName),
-            "ln -sf /sched/{}/slurm.conf /etc/slurm/slurm.conf".format(slurmClusterName),
-            "ln -sf /sched/{}/gres.conf /etc/slurm/gres.conf".format(slurmClusterName),
-            "ln -sf /sched/{}/azure.conf /etc/slurm/azure.conf".format(slurmClusterName),
-            "ln -sf /sched/{}/keep_alive.conf /etc/slurm/keep_alive.conf".format(slurmClusterName),
-            "ln -sf /sched/{}/cgroup.conf /etc/slurm/cgroup.conf".format(slurmClusterName),
+            "ln -sf {}/slurm.conf /etc/slurm/slurm.conf".format(configurationPath),
+            "ln -sf {}/gres.conf /etc/slurm/gres.conf".format(configurationPath),
+            "ln -sf {}/azure.conf /etc/slurm/azure.conf".format(configurationPath),
+            "ln -sf {}/keep_alive.conf /etc/slurm/keep_alive.conf".format(configurationPath),
+            "ln -sf {}/cgroup.conf /etc/slurm/cgroup.conf".format(configurationPath),
         ])
 
         clusterDefinition = {

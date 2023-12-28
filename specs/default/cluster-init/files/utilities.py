@@ -53,7 +53,7 @@ def concatenateToOnDemandConfiguration(configuration):
 def createUserAndGroup(name, UID, GID):
     executeCommandList([
         "groupadd -g {} {}".format(GID, name),
-        "useradd -u {} -G {} {}".format(UID, GID, name)
+        "useradd -u {} -g {} {}".format(UID, GID, name)
     ])
 
 def getJetpackConfiguration():
