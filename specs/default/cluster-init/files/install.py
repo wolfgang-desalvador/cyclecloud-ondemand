@@ -433,7 +433,7 @@ class OpenOnDemandInstaller():
 
         if self.osVersion == "7":
             executeCommandList([
-                "systemctl restart httpd24-httpd"
+                "systemctl restart httpd24-httpd",
                 "systemctl enable httpd24-httpd"
             ])
         elif self.osVersion == "8":
