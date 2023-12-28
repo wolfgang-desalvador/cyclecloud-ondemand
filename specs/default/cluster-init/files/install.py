@@ -291,6 +291,7 @@ class OpenOnDemandInstaller():
             "jetpack download {} --project ondemand ./".format(SLURM_PACKAGE_NAME),
             "tar -xzf {}".format(SLURM_PACKAGE_NAME),
             "yum localinstall -y azure-slurm-install/{}/{}".format(slurmFolder, slurmBinaryName),
+            "mkdir -p /etc/slurm",
             "ln -sf {}/slurm.conf /etc/slurm/slurm.conf".format(configurationPath),
             "ln -sf {}/gres.conf /etc/slurm/gres.conf".format(configurationPath),
             "ln -sf {}/azure.conf /etc/slurm/azure.conf".format(configurationPath),
