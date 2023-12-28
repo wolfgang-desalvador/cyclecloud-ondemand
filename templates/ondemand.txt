@@ -326,14 +326,14 @@ Order = 17
         ParameterType = Azure.ManagedIdentity
         Label = MSI Identity
         Description = The Azure user assigned managed identity to access the Azure Key Vault secret and certificate. Make sure it has 'Get' Permission of the Azure Key vault secret and certificate. The identity will be applied to all nodes.
-        Required = ${AuthType != "basic" || SSLType != "self_signed"}
+        Conditions.Required := AuthType != "basic" || SSLType != "self_signed"
         Order = 17
 
         [[[parameter AzureKeyVaultName]]]
         ParameterType = String
         Label = Vault Name
         Description = Azure Vault Name containing the secrets
-        Required = ${AuthType != "basic" || SSLType != "self_signed"}
+        Conditions.Required := AuthType != "basic" || SSLType != "self_signed"
         Order = 18
 
 
@@ -372,7 +372,7 @@ Order = 17
         Description = OIDC Application ID in Azure Active Directory
         DefaultValue = ""
         Conditions.Excluded := AuthType != "oidc_aad"
-        Required = AuthType == "oidc_aad"
+        Conditions.Required :=  AuthType == "oidc_aad"
         Order = 23
 
         [[[parameter ClientSecretName]]]
@@ -380,7 +380,7 @@ Order = 17
         Description = Client Secret Name in Azure Key Vault
         DefaultValue = ""
         Conditions.Excluded := AuthType != "oidc_aad"
-        Required = AuthType == "oidc_aad"
+        Conditions.Required := AuthType == "oidc_aad"
         Order = 24
 
         [[[parameter MetadataURL]]]
@@ -388,7 +388,7 @@ Order = 17
         Description = Metadata URL
         DefaultValue = "https://login.microsoftonline.com/{tenant_id}/v2.0/.well-known/openid-configuration"
         Conditions.Excluded := AuthType != "oidc_aad"
-        Required = AuthType == "oidc_aad"
+        Conditions.Required :=  AuthType == "oidc_aad"
         Order = 25
 
         [[[parameter oidc_scope]]]
@@ -396,7 +396,7 @@ Order = 17
         Description = OIDC scope
         DefaultValue = "openid profile email"
         Conditions.Excluded := AuthType != "oidc_aad"
-        Required = AuthType == "oidc_aad"
+        Conditions.Required :=  AuthType == "oidc_aad"
         Order = 26
 
         [[[parameter oidc_remote_user_claim]]]
@@ -404,7 +404,7 @@ Order = 17
         Description = OIDC Remote user claim
         DefaultValue = "preferred_username"
         Conditions.Excluded := AuthType != "oidc_aad"
-        Required = AuthType == "oidc_aad"
+        Conditions.Required :=  AuthType == "oidc_aad"
         Order = 27
         
         [[[parameter ldapHost]]]
@@ -412,7 +412,7 @@ Order = 17
         Description = LDAPS host in the form hostname:port
         DefaultValue = ""
         Conditions.Excluded := AuthType != "oidc_ldap"
-        Required = AuthType == "oidc_ldap"
+        Conditions.Required :=  AuthType == "oidc_ldap"
         Order = 28
 
         [[[parameter bindDN]]]
@@ -420,7 +420,7 @@ Order = 17
         Description = LDAPS read only bind service account 
         DefaultValue = "cn=read_only_user,dc=example,dc=org"
         Conditions.Excluded := AuthType != "oidc_ldap"
-        Required = AuthType == "oidc_ldap"
+        Conditions.Required := AuthType == "oidc_ldap"
         Order = 29
 
         [[[parameter ldapBindPWName]]]
@@ -428,7 +428,7 @@ Order = 17
         Description = Bind account password secret name in Azure Key Vault
         DefaultValue = ""
         Conditions.Excluded := AuthType != "oidc_ldap"
-        Required = AuthType == "oidc_ldap"
+        Conditions.Required := AuthType == "oidc_ldap"
         Order = 30
 
 
@@ -436,14 +436,14 @@ Order = 17
         Label = User BaseDN
         DefaultValue = "ou=People,dc=example,dc=org"
         Conditions.Excluded := AuthType != "oidc_ldap"
-        Required = AuthType == "oidc_ldap"
+        Conditions.Required := AuthType == "oidc_ldap"
         Order = 31
 
         [[[parameter userFilter]]]
         Label = User Filter
         DefaultValue = "(objectClass=posixAccount)"
         Conditions.Excluded := AuthType != "oidc_ldap"
-        Required = AuthType == "oidc_ldap"
+        Conditions.Required := AuthType == "oidc_ldap"
         Order = 32
 
 
@@ -451,7 +451,7 @@ Order = 17
         Label = Username attribute 
         DefaultValue = "sAMAccountName"
         Conditions.Excluded := AuthType != "oidc_ldap"
-        Required = AuthType == "oidc_ldap"
+        Conditions.Required := AuthType == "oidc_ldap"
         Order = 33
 
         
@@ -459,63 +459,63 @@ Order = 17
         Label = ID attribute 
         DefaultValue = "uidNumber"
         Conditions.Excluded := AuthType != "oidc_ldap"
-        Required = AuthType == "oidc_ldap"
+        Conditions.Required := AuthType == "oidc_ldap"
         Order = 34
 
         [[[parameter emailAttribute]]]
         Label = Email attribute 
         DefaultValue = "mail"
         Conditions.Excluded := AuthType != "oidc_ldap"
-        Required = AuthType == "oidc_ldap"
+        Conditions.Required := AuthType == "oidc_ldap"
         Order = 35
 
         [[[parameter nameAttribute]]]
         Label = Name Attribute
         DefaultValue = "givenName"
         Conditions.Excluded := AuthType != "oidc_ldap"
-        Required = AuthType == "oidc_ldap"
+        Conditions.Required := AuthType == "oidc_ldap"
         Order = 36
 
         [[[parameter preferredUsernameAttribute]]]
         Label = Preferred Username Attribute
         DefaultValue = "sAMAccountName"
         Conditions.Excluded := AuthType != "oidc_ldap"
-        Required = AuthType == "oidc_ldap"
+        Conditions.Required := AuthType == "oidc_ldap"
         Order = 37
 
         [[[parameter groupBaseDN]]]
         Label = Group BaseDN
         DefaultValue = "ou=Groups,dc=example,dc=org"
         Conditions.Excluded := AuthType != "oidc_ldap"
-        Required = AuthType == "oidc_ldap"
+        Conditions.Required := AuthType == "oidc_ldap"
         Order = 38
 
         [[[parameter groupFilter]]]
         Label = Group Filter
         DefaultValue = "(objectClass=posixGroup)"
         Conditions.Excluded := AuthType != "oidc_ldap"
-        Required = AuthType == "oidc_ldap"
+        Conditions.Required := AuthType == "oidc_ldap"
         Order = 39
 
         [[[parameter groupUserMatcherAttribute]]]
         Label = Group User Matcher Attribute
         DefaultValue = "DN"
         Conditions.Excluded := AuthType != "oidc_ldap"
-        Required = AuthType == "oidc_ldap"
+        Conditions.Required := AuthType == "oidc_ldap"
         Order = 40
 
         [[[parameter groupMatcherAttribute]]]
         Label = Group Matcher Attribute
         DefaultValue = "member"
         Conditions.Excluded := AuthType != "oidc_ldap"
-        Required = AuthType == "oidc_ldap"
+        Conditions.Required := AuthType == "oidc_ldap"
         Order = 41
 
         [[[parameter groupNameAttribute]]]
         Label = Group Name  Attribute
         DefaultValue = "cn"
         Conditions.Excluded := AuthType != "oidc_ldap"
-        Required = AuthType == "oidc_ldap"
+        Conditions.Required := AuthType == "oidc_ldap"
         Order = 42
 
         [[[parameter requiresLDAPCert]]]
@@ -523,6 +523,7 @@ Order = 17
         Widget.Plugin = pico.form.BooleanCheckBox
         Widget.Label = Requires LDAP Cert
         Conditions.Excluded := AuthType != "oidc_ldap"
+        Conditions.Required := AuthType == "oidc_ldap"
         Order = 43
 
         [[[parameter ldapCertName]]]
@@ -531,7 +532,8 @@ Order = 17
         DefaultValue = ""
         Conditions.Hidden := requiresLDAPCert is false
         Conditions.Excluded := AuthType != "oidc_ldap"
-         Order = 44
+        Conditions.Required := requiresLDAPCert is not false
+        Order = 44
 
     [[parameters SSL Configuration]]
         
@@ -563,7 +565,7 @@ Order = 17
         Description = Certificate name in Azure Key Vault
         DefaultValue = ""
         Conditions.Excluded := SSLType == "self_signed"
-        Required = SSLType != "self_signed"
+        Conditions.Required := SSLType != "self_signed"
         Order = 46
         
         [[[parameter certificateKeyName]]]
@@ -571,7 +573,7 @@ Order = 17
         Description = Certificate key name in Azure Key Vault
         DefaultValue = ""
         Conditions.Excluded := SSLType == "self_signed"
-        Required = SSLType != "self_signed"
+        Conditions.Required := SSLType != "self_signed"
         Order = 47
 
 [parameters Scheduler]
@@ -617,6 +619,7 @@ Order = 18
         ParameterType = String
         Description = Slurm Cluster Name as reported in Azure CycleCloud
         Conditions.Excluded := schedulerType == "pbs"
+        Conditions.Required := schedulerType == "slurm"
 
 
 [parameters Advanced Settings]
