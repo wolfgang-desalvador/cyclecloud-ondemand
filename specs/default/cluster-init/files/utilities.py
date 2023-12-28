@@ -8,10 +8,13 @@ from azure.identity import DefaultAzureCredential
 from constants import OOD_CONFIG_PATH
 
 
-def executeCommandList(commandList):   
+def executeCommandList(commandList, monitor=False):   
     for command in commandList:
         process = subprocess.Popen(command.split(" "))
         process.wait()
+
+        if monitor and process.returncode != 0:
+            raise RuntimeError('The installation process failed unexpectedly, please check output')
 
 def getOutputFromCommand(command):   
     return subprocess.check_output(command.split(" "))

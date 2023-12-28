@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 SCRIPT_FOLDER="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 PYTHON_INTERPRETER="/opt/cycle/ondemand"

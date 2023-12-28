@@ -408,9 +408,7 @@ class OpenOnDemandInstaller():
                 "yum install -y https://yum.osc.edu/ondemand/3.0/ondemand-release-web-3.0-1.noarch.rpm",
                 "yum install -y ondemand",
                 "yum install -y python3",
-                "yum install -y ondemand-dex",
-                "systemctl start httpd24-httpd",
-                "systemctl enable httpd24-httpd"
+                "yum install -y ondemand-dex"
             ])
         elif self.osVersion == "8":
             self.logger.debug("Executing recipe for RHEL 8")
@@ -420,9 +418,7 @@ class OpenOnDemandInstaller():
                 "dnf module enable ruby:3.0 nodejs:14 -y",
                 "yum install https://yum.osc.edu/ondemand/3.0/ondemand-release-web-3.0-1.noarch.rpm -y",
                 "yum install -y ondemand-dex",
-                "yum install ondemand -y",
-                "sudo systemctl start httpd",
-                "sudo systemctl enable httpd",
+                "yum install ondemand -y"
             ])
 
     def finalizeInstalltion(self):
@@ -435,12 +431,12 @@ class OpenOnDemandInstaller():
             executeCommandList([
                 "systemctl restart httpd24-httpd",
                 "systemctl enable httpd24-httpd"
-            ])
+            ], monitor=True)
         elif self.osVersion == "8":
             executeCommandList([
                 "systemctl restart httpd",
                 "systemctl enable httpd",
-            ])
+            ], monitor=True)
 
 
 if __name__ == '__main__':
