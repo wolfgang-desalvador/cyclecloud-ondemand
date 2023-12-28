@@ -1,0 +1,445 @@
+import sys
+import shutil
+import datetime
+import yaml
+import os
+
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes
+from cryptography.x509.oid import NameOID
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+
+from utilities import  getRHELVersion, createUserAndGroup, executeCommandList, readOnDemandConfiguration, writeOnDemandConfiguration, \
+      getSecretValue, readOnDemandConfiguration, writeOnDemandConfiguration, getSecretValue, getJetpackConfiguration, executeCommandList
+from constants import OOD_CONFIG_PATH, OOD_CERT_LOCATION, OOD_KEY_LOCATION, SLURM_PACKAGE_NAME, CONFIGURATION_COMPLETED
+from logger import OnDemandCycleCloudLogger
+
+
+class OpenOnDemandInstaller():
+    def __init__(self) -> None:
+        self.cycleCloudOnDemandSettings = getJetpackConfiguration()
+        self.logger = OnDemandCycleCloudLogger
+        self.osVersion = getRHELVersion()
+
+    @staticmethod
+    def _isConfigured():
+        return os.path.exists(CONFIGURATION_COMPLETED)
+
+    def _logConfiguration(self, configuration):
+        self.logger.debug('New configuration looks like {}'.format(configuration))  
+
+    def _configureAuthenticationBasic(self):
+        self.logger.debug('The selected OS Version is {}'.format(self.osVersion))
+        if self.osVersion == "7":
+            executeCommandList([
+                "yum -y install mod_authnz_pam",
+                "cp /usr/lib64/httpd/modules/mod_authnz_pam.so /opt/rh/httpd24/root/usr/lib64/httpd/modules/",
+                "mkdir -p /opt/rh/httpd24/root/etc/httpd/conf.modules.d/",
+                "cp /etc/pam.d/sshd /etc/pam.d/ood",
+                "chmod 640 /etc/shadow",
+                "chgrp apache /etc/shadow"
+            ])
+
+            with open('/opt/rh/httpd24/root/etc/httpd/conf.modules.d/55-authnz_pam.conf', 'w') as fid:
+                fid.write('LoadModule authnz_pam_module modules/mod_authnz_pam.so')
+            
+        elif self.osVersion == "8":
+            executeCommandList([
+                "yum -y install mod_authnz_pam",
+                "mkdir -p /etc/httpd/conf.modules.d/",
+                "cp /etc/pam.d/sshd /etc/pam.d/ood",
+                "chmod 640 /etc/shadow",
+                "chgrp apache /etc/shadow"
+            ])
+
+            with open('/etc/httpd/conf.modules.d/55-authnz_pam.conf', 'w') as fid:
+                fid.write('LoadModule authnz_pam_module modules/mod_authnz_pam.so')
+        else:
+            self.logger.error('Unsupported OS in the configuration. Exiting...')
+            sys.exit(1)
+
+        onDemandConfiguration = readOnDemandConfiguration()
+
+        self.logger.debug('Writing basic authentication configuration to {}'.format(OOD_CONFIG_PATH))
+
+        onDemandConfiguration['auth'] = [
+            "AuthType Basic",
+            "AuthName 'Open OnDemand'",
+            "AuthBasicProvider PAM",
+            "AuthPAMService ood",
+            "Require valid-user"
+        ]
+
+        self._logConfiguration(onDemandConfiguration)
+
+        writeOnDemandConfiguration(onDemandConfiguration)
+
+    def _configureAuthenticationOIDC_AD(self):
+        onDemandConfiguration = readOnDemandConfiguration()
+
+        onDemandConfiguration['auth'] = [
+            "AuthType openid-connect",
+            "Require valid-user",
+        ]
+
+        onDemandConfiguration['logout_redirect'] = "/oidc?logout=https%3A%2F%2F{}".format(
+            self.cycleCloudOnDemandSettings['ondemand']['portal']['serverName']
+        )
+        onDemandConfiguration['oidc_provider_metadata_url'] = self.cycleCloudOnDemandSettings['ondemand']['auth']['oidcAAD']['MetadataURL']
+        onDemandConfiguration['oidc_client_id'] = self.cycleCloudOnDemandSettings['ondemand']['auth']['oidcAAD']['ClientID']
+
+        onDemandConfiguration['oidc_client_secret'] = getSecretValue(
+            self.cycleCloudOnDemandSettings['ondemand']['keyVaultName'], self.cycleCloudOnDemandSettings['ondemand']['auth']['oidcAAD']['ClientSecretName']
+        )
+
+        onDemandConfiguration.update({
+            "oidc_uri": "/oidc",
+            "oidc_remote_user_claim": self.cycleCloudOnDemandSettings['ondemand']['auth']['oidcAAD']['oidc_remote_user_claim'],
+            "oidc_scope": self.cycleCloudOnDemandSettings['ondemand']['auth']['oidcAAD']['oidc_scope'],
+            "oidc_session_inactivity_timeout": 28800,
+            "oidc_session_max_duration": 28800,
+            "oidc_state_max_number_of_cookies": "10 true",
+            "oidc_settings": {
+                "OIDCPassIDTokenAs": "serialized",
+                "OIDCPassRefreshToken": "On",
+                "OIDCPassClaimsAs": "environment",
+                "OIDCStripCookies": "mod_auth_openidc_session mod_auth_openidc_session_chunks mod_auth_openidc_session_0 mod_auth_openidc_session_1",
+                "OIDCResponseType": "code"
+            }
+        })
+
+        self._logConfiguration(onDemandConfiguration)
+        writeOnDemandConfiguration(onDemandConfiguration)
+
+    def _configureAuthenticationOIDC_LDAP(self):
+        onDemandConfiguration = readOnDemandConfiguration()
+
+        oidcLDAP = self.cycleCloudOnDemandSettings['ondemand']['auth']['oidc_ldap']
+
+        onDemandConfiguration['auth'] = [
+            "AuthType openid-connect",
+            "Require valid-user",
+        ]
+
+        onDemandConfiguration['dex'] = {
+            'connectors': [
+                {
+                    'type': 'ldap',
+                    'id': 'ldap',
+                    'name': 'LDAP',
+                    'config': {
+                        'host': oidcLDAP['ldapHost'],
+                        'insecureSkipVerify': False,
+                        'bindDN': oidcLDAP['bindDN'],
+                        'bindPW': getSecretValue(self.cycleCloudOnDemandSettings['ondemand']['keyVaultName'], oidcLDAP['ldapBindPWName']),
+                        'userSearch': {
+                            'baseDN': oidcLDAP['userBaseDN'],
+                            'filter': oidcLDAP['userFilter'],
+                            'username': oidcLDAP['userName'],
+                            'idAttr': oidcLDAP['idAttribute'],
+                            'emailAttr': oidcLDAP['emailAttribute'],
+                            'nameAttr': oidcLDAP['nameAttribute'],
+                            'preferredUsernameAttr': oidcLDAP['preferredUsernameAttribute']
+                        },
+                        'groupSearch': {
+                            'baseDN':  oidcLDAP['groupBaseDN'],
+                            'filter': oidcLDAP['groupFilter'],
+                            'userMatchers': [
+                                {
+                                    'userAttr': oidcLDAP['groupUserMatcherAttribute'],
+                                    'groupAttr': oidcLDAP['groupMatcherAttribute']
+                                }
+                            ],
+                            'nameAttr': oidcLDAP['groupNameAttribute']
+                        }
+                    }
+                }
+            ]
+        }
+
+        if oidcLDAP['requiresLDAPCert']:
+            with open('/etc/ssl/ldap.crt', 'w') as fid:
+                fid.write(getSecretValue(self.cycleCloudOnDemandSettings['ondemand']['keyVaultName'], oidcLDAP['ldapCertName']))
+
+            onDemandConfiguration['dex']['connectors'][0]['config']['rootCA'] = '/etc/ssl/ldap.crt'
+
+        self._logConfiguration(onDemandConfiguration)
+        writeOnDemandConfiguration(onDemandConfiguration)
+        
+        executeCommandList([
+            "/opt/ood/ood-portal-generator/sbin/update_ood_portal"
+            "systemctl enable ondemand-dex",
+            "systemctl restart ondemand-dex"
+        ])
+
+    def _configureSelfSignedSSL(self):
+        key = rsa.generate_private_key(
+        public_exponent=65537,
+        key_size=2048,
+        )
+
+        with open(OOD_KEY_LOCATION, "wb") as f:
+            f.write(key.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.TraditionalOpenSSL,
+                encryption_algorithm=serialization.NoEncryption()
+            ))
+
+        # Various details about who we are. For a self-signed certificate the
+        # subject and issuer are always the same.
+        subject = issuer = x509.Name([
+            x509.NameAttribute(NameOID.COMMON_NAME, self.cycleCloudOnDemandSettings['ondemand']['portal']['serverName']),
+        ])
+
+        cert = x509.CertificateBuilder().subject_name(
+            subject
+        ).issuer_name(
+            issuer
+        ).public_key(
+            key.public_key()
+        ).serial_number(
+            x509.random_serial_number()
+        ).not_valid_before(
+            datetime.datetime.now(datetime.timezone.utc)
+        ).not_valid_after(
+            # Our certificate will be valid for 1 year
+            datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=365)
+        ).add_extension(
+            x509.SubjectAlternativeName([x509.DNSName(self.cycleCloudOnDemandSettings['ondemand']['portal']['serverName'])]),
+            critical=False,
+        # Sign our certificate with our private key
+        ).add_extension(
+            x509.BasicConstraints(ca=True, path_length=0),
+            critical=False
+        ).sign(key, hashes.SHA256())
+
+        # Write our certificate out to disk.
+        with open(OOD_CERT_LOCATION, "wb") as f:
+            f.write(cert.public_bytes(serialization.Encoding.PEM))
+        
+        shutil.copy(OOD_CERT_LOCATION, '/etc/pki/ca-trust/source/anchors')
+        executeCommandList([
+            "update-ca-trust"
+        ])
+    
+    def _configureKeyVaultSSL(self):
+        with open(OOD_CERT_LOCATION, 'w') as fid:
+            fid.write(getSecretValue(self.cycleCloudOnDemandSettings['keyVaultName'], self.cycleCloudOnDemandSettings['ssl']['certficateName']))
+
+        with open(OOD_KEY_LOCATION, 'w') as fid:
+            fid.write(getSecretValue(self.cycleCloudOnDemandSettings['keyVaultName'], self.cycleCloudOnDemandSettings['ssl']['certficateKeyName']))
+
+    def _configurePBS(self):
+        schedulerVersion = self.cycleCloudOnDemandSettings['ondemand']['scheduler']['pbsVersion']
+        schedulerHost = self.cycleCloudOnDemandSettings['ondemand']['scheduler']['host']
+        if schedulerVersion.split('.')[0] == '18':
+            pbsBinaryName = "pbspro-client-{}-0.x86_64.rpm".format(
+                schedulerVersion)
+        else:
+            pbsBinaryName = "openpbs-client-{}-0.x86_64.rpm".format(
+                schedulerVersion)
+
+        executeCommandList([
+            "jetpack download {} --project ondemand ./".format(pbsBinaryName),
+            "yum localinstall -y {}".format(pbsBinaryName)
+        ])
+
+        clusterDefinition = {
+            'v2': {
+                'metadata': {'title': "PBS Cluster"},
+                'login': {'host': schedulerHost},
+                'job': {'host': schedulerHost, 'adapter': 'pbspro', 'exec': '/opt/pbs'}
+            }
+        }
+        if not os.path.exists('/etc/ood/config/clusters.d/'):
+            os.mkdir('/etc/ood/config/clusters.d/')
+        yaml.dump(clusterDefinition, open(
+            '/etc/ood/config/clusters.d/pbs.yml', 'w'))
+    
+    def _configureSLURM(self):
+        schedulerHost = self.cycleCloudOnDemandSettings['ondemand']['scheduler']['host']
+        schedulerVersion = self.cycleCloudOnDemandSettings['ondemand']['scheduler']['slurmVersion']
+        slurmClusterName = self.cycleCloudOnDemandSettings['ondemand']['slurmClusterName']
+
+        slurmBinaryName = "slurm-{}-1.el{}.x86_64.rpm".format(
+                schedulerVersion, self.osVersion)
+
+        if self.osVersion == "7":
+            slurmFolder = "slurm-pkgs-centos7"
+        elif self.osVersion == "8":
+            slurmFolder = "slurm-pkgs-rhel8"
+
+        createUserAndGroup("slurm", self.cycleCloudOnDemandSettings['ondemand']['scheduler']['slurmUID'], self.cycleCloudOnDemandSettings['ondemand']['scheduler']['slurmGID'])
+        createUserAndGroup("munge", self.cycleCloudOnDemandSettings['ondemand']['scheduler']['mungeUID'], self.cycleCloudOnDemandSettings['ondemand']['scheduler']['mungeGID'])
+
+        executeCommandList([
+            "yum install -y munge"
+            "cp -f /sched/*/munge.key /etc/munge/",
+            "chown munge:munge /etc/munge/munge.key",
+            "chmod 600 /etc/munge/munge.key",
+            "systemctl enable munge --now",
+            "systemctl restart munge",
+            "jetpack download {} --project ondemand ./".format(SLURM_PACKAGE_NAME),
+            "tar -xzf {}".format(SLURM_PACKAGE_NAME),
+            "cd az-slurm-install",
+            "cd {}".format(slurmFolder),
+            "yum localinstall -y {}".format(slurmBinaryName),
+            "ln -sf /sched/{}/slurm.conf /etc/slurm/slurm.conf".format(slurmClusterName),
+            "ln -sf /sched/{}/gres.conf /etc/slurm/gres.conf".format(slurmClusterName),
+            "ln -sf /sched/{}/azure.conf /etc/slurm/azure.conf".format(slurmClusterName),
+            "ln -sf /sched/{}/keep_alive.conf /etc/slurm/keep_alive.conf".format(slurmClusterName),
+            "ln -sf /sched/{}/cgroup.conf /etc/slurm/cgroup.conf".format(slurmClusterName),
+        ])
+
+        clusterDefinition = {
+            'v2': {
+                'metadata': {'title': "Slurm Cluster"},
+                'login': {'host': schedulerHost},
+                'job': {'host': schedulerHost, 'cluster': slurmClusterName, 'adapter': 'slurm', 'bin': '/usr/bin', 'conf': '/etc/slurm/slurm.conf'}
+            }
+        }
+        if not os.path.exists('/etc/ood/config/clusters.d/'):
+            os.mkdir('/etc/ood/config/clusters.d/')
+        yaml.dump(clusterDefinition, open(
+            '/etc/ood/config/clusters.d/slurm.yml', 'w'))
+    
+    def install(self):
+        if self._isConfigured():
+            self.logger.warn('Skipping installation since already configured')
+
+        else:
+            self.logger.debug('Initializing OnDemand Installation')
+
+            self.logger.debug('Install Portal')
+            self.installPortal()
+
+
+            self.logger.debug('Initializing authentication configuration')
+            self.configureAuthentication()
+
+            self.logger.debug('Initializing SSL configuration')
+            self.configureSSL()
+
+            self.logger.debug('Initializing Scheduler Configuration')
+            self.configureScheduler()
+
+            self.logger.debug('Adding Server Name')
+            self.addServerName()
+
+            self.logger.debug('Adding Extra Configuration')
+            self.addExtraConfiguration()
+
+            self.logger.debug('Finalizing OnDemand Installation')
+            self.finalizeInstalltion()
+
+    def configureAuthentication(self):
+        authenticationType = self.cycleCloudOnDemandSettings['ondemand']['auth']['AuthType']
+        self.logger.debug('The selected authentication type is {}'.format(authenticationType))
+
+        if authenticationType == 'basic':
+            self._configureAuthenticationBasic()
+        elif authenticationType == 'oidc_aad':
+            self._configureAuthenticationOIDC_AD()
+        elif authenticationType == 'oidc_ldap':
+            self._configureAuthenticationOIDC_LDAP()
+
+    def configureSSL(self):
+        sslType = self.cycleCloudOnDemandSettings['ondemand']['ssl']['SSLType']
+
+        onDemandConfiguration = readOnDemandConfiguration()
+
+        onDemandConfiguration['ssl'] = [
+            'SSLCertificateFile "{}"'.format(OOD_CERT_LOCATION),
+            'SSLCertificateKeyFile "{}"'.format(OOD_KEY_LOCATION)
+        ]
+
+        writeOnDemandConfiguration(onDemandConfiguration)
+
+        if sslType == 'self_signed':
+            self._configureSelfSignedSSL()
+        elif sslType == 'keyvault':
+            self._configureKeyVaultSSL()
+
+    def configureScheduler(self):
+        schedulerType = self.cycleCloudOnDemandSettings['ondemand']['scheduler']['type']
+
+        if schedulerType == 'pbs':
+            self._configurePBS()
+        elif schedulerType == 'slurm':
+            self._configureSLURM()
+
+    def addServerName(self):
+        onDemandConfiguration = readOnDemandConfiguration()
+
+        onDemandConfiguration['servername'] = self.cycleCloudOnDemandSettings['ondemand']['portal']['serverName']
+
+        self._logConfiguration(onDemandConfiguration)
+        writeOnDemandConfiguration(onDemandConfiguration)
+
+    def addExtraConfiguration(self):
+        extraConfiguration = self.cycleCloudOnDemandSettings['ondemand']['portal']['extraConfiguration']
+
+        if extraConfiguration:
+            ondemandConfiguration = readOnDemandConfiguration()
+
+            ondemandConfiguration.update(yaml.safe_load(extraConfiguration))
+
+            writeOnDemandConfiguration(ondemandConfiguration)
+
+    def writeInstallationCompleted(self):
+        with open(CONFIGURATION_COMPLETED, 'w') as fid:
+            fid.write('Configuration completed!')
+
+
+    def installPortal(self):
+        if self.osVersion == "7":
+            executeCommandList([
+                "rm -rf /opt/rh/httpd24/root/etc/httpd/conf.d/"
+                "mkdir -p /ood/etc"
+                "mkdir -p /ood/opt"
+                "mkdir -p /ood/www"
+                "mkdir -p /var/www/"
+                "ln -s /ood/etc /etc/ood"
+                "ln -s /ood/opt /opt/ood"
+                "ln -s /ood/www /var/www/ood"
+                "yum install -y centos-release-scl epel-release"
+                "yum install -y https://yum.osc.edu/ondemand/3.0/ondemand-release-web-3.0-1.noarch.rpm"
+                "yum install -y ondemand"
+                "yum install -y python3"
+                "yum install -y ondemand-dex"
+                "systemctl start httpd24-httpd"
+                "systemctl enable httpd24-httpd"
+            ])
+        elif self.osVersion == "8":
+            executeCommandList([
+                "dnf config-manager --set-enabled powertools",
+                "dnf install epel-release -y",
+                "dnf module enable ruby:3.0 nodejs:14 -y",
+                "yum install https://yum.osc.edu/ondemand/3.0/ondemand-release-web-3.0-1.noarch.rpm -y",
+                "yum install -y ondemand-dex",
+                "yum install ondemand -y",
+                "sudo systemctl start httpd",
+                "sudo systemctl enable httpd",
+            ])
+
+    def finalizeInstalltion(self):
+        executeCommandList([       
+            "rm -rf /var/run/ondemand-nginx/*",
+            "chmod 600 /etc/ood/config/ood_portal.yml"
+        ])
+
+        if self.osVersion == "7":
+            executeCommandList([
+                "systemctl restart httpd24-httpd"
+                "systemctl enable httpd24-httpd"
+            ])
+        elif self.osVersion == "8":
+            executeCommandList([
+                "systemctl restart httpd",
+                "systemctl enable httpd",
+            ])
+
+if __name__ == '__main__':
+    installer = OpenOnDemandInstaller()
+    installer.install()

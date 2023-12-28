@@ -10,16 +10,14 @@ from constants import OOD_CONFIG_PATH
 
 def executeCommandList(commandList):   
     for command in commandList:
-        subprocess.check_output(command.split(" "))
-
+        process = subprocess.Popen(command.split(" "))
+        process.wait()
 
 def getOutputFromCommand(command):   
     return subprocess.check_output(command.split(" "))
 
-
 def getRHELVersion():
     return str(getOutputFromCommand("lsb_release -rs").decode()[0])
-
 
 def readOnDemandConfiguration():
     with open(OOD_CONFIG_PATH, 'r') as fid:

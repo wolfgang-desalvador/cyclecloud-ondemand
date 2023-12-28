@@ -21,8 +21,9 @@ Autoscale = false
     
         [[[configuration]]]
         # For fast spin-up after Deallocate, force an immediate re-converge on boot
+        cuser.base_home_dir = /shared/home
         cyclecloud.converge_on_boot = true
-
+        
         # Disable normal NFS exports and mounts
         cyclecloud.mounts.sched.disabled = true
         cyclecloud.mounts.shared.disabled = true
@@ -55,7 +56,7 @@ Autoscale = false
         ondemand.auth.oidc_ldap.groupNameAttribute = $groupNameAttribute
         ondemand.auth.oidc_ldap.requiresLDAPCert = $requiresLDAPCert
         ondemand.auth.oidc_ldap.ldapCertName = $ldapCertName
-
+        
         ondemand.ssl.SSLType = $SSLType
         ondemand.ssl.certificateName = $certificateName
         ondemand.ssl.certificateKeyName = $certificateKeyName
