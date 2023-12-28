@@ -313,25 +313,26 @@ class OpenOnDemandInstaller():
 
             self.logger.debug('Install Portal')
             self.installPortal()
+            self.writeInstallationCompleted()
 
-            self.logger.debug('Initializing authentication configuration')
-            self.configureAuthentication()
+        self.logger.debug('Initializing authentication configuration')
+        self.configureAuthentication()
 
-            self.logger.debug('Initializing SSL configuration')
-            self.configureSSL()
+        self.logger.debug('Initializing SSL configuration')
+        self.configureSSL()
 
-            self.logger.debug('Initializing Scheduler Configuration')
-            self.configureScheduler()
+        self.logger.debug('Initializing Scheduler Configuration')
+        self.configureScheduler()
 
-            self.logger.debug('Adding Server Name')
-            self.addServerName()
+        self.logger.debug('Adding Server Name')
+        self.addServerName()
 
-            self.logger.debug('Adding Extra Configuration')
-            self.addExtraConfiguration()
+        self.logger.debug('Adding Extra Configuration')
+        self.addExtraConfiguration()
 
-            self.logger.debug('Finalizing OnDemand Installation')
-            self.finalizeInstalltion()
-
+        self.logger.debug('Finalizing OnDemand Installation')
+        self.finalizeInstalltion()
+        
     def configureAuthentication(self):
         authenticationType = self.cycleCloudOnDemandSettings['ondemand']['auth']['AuthType']
         self.logger.debug('The selected authentication type is {}'.format(authenticationType))

@@ -532,7 +532,7 @@ Order = 17
         DefaultValue = ""
         Conditions.Hidden := requiresLDAPCert is false
         Conditions.Excluded := AuthType != "oidc_ldap"
-        Conditions.Required := requiresLDAPCert is not false
+        Conditions.Required := requiresLDAPCert isnt false
         Order = 44
 
     [[parameters SSL Configuration]]
@@ -543,6 +543,7 @@ Order = 17
         Config.Plugin = pico.widget.HtmlTemplateWidget
         Config.Template = ''' <p> Select how to enforce SSL in the portal. The self-signed option can be used for testing, but moving to production, an SSL Cert from a relevant CA must be 
            configured in the portal and placed in the Azure Key Vault
+            <p>
             <strong>[Self-Signed]</strong>: A certificate will be generated with a self-generated Certification Authority against the Portal Name specified. This will pop-up unsecure message in browser
             </p>
             <p>
