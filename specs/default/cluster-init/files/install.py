@@ -314,7 +314,6 @@ class OpenOnDemandInstaller():
             self.logger.debug('Install Portal')
             self.installPortal()
 
-
             self.logger.debug('Initializing authentication configuration')
             self.configureAuthentication()
 
@@ -392,7 +391,10 @@ class OpenOnDemandInstaller():
             fid.write('Configuration completed!')
 
     def installPortal(self):
+        self.logger.debug('The selected OS Version is {}'.format(self.osVersion))
+
         if self.osVersion == "7":
+            self.logger.debug("Executing recipe for RHEL 7")
             executeCommandList([
                 "rm -rf /opt/rh/httpd24/root/etc/httpd/conf.d/"
                 "mkdir -p /ood/etc"
@@ -411,6 +413,7 @@ class OpenOnDemandInstaller():
                 "systemctl enable httpd24-httpd"
             ])
         elif self.osVersion == "8":
+            self.logger.debug("Executing recipe for RHEL 8")
             executeCommandList([
                 "dnf config-manager --set-enabled powertools",
                 "dnf install epel-release -y",
