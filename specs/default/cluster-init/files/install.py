@@ -304,7 +304,7 @@ class OpenOnDemandInstaller():
             'v2': {
                 'metadata': {'title': "Slurm Cluster"},
                 'login': {'host': schedulerHost},
-                'job': {'host': schedulerHost, 'cluster': slurmClusterName, 'adapter': 'slurm', 'bin': '/usr/bin', 'conf': '/etc/slurm/slurm.conf'}
+                'job': {'host': schedulerHost, 'adapter': 'slurm', 'bin': '/usr/bin', 'conf': '/etc/slurm/slurm.conf'}
             }
         }
         if not os.path.exists('/etc/ood/config/clusters.d/'):
