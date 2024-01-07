@@ -34,13 +34,13 @@ The project has been tested on the following matrix:
 <td><b>Azure CycleCloud Project Version</b></td>
 </tr>
 <tr>
-<td>8.4.1</td>
+<td>8.4.1-3154</td>
 <td>Slurm</td>
-<td>22.05.10 / 23.02.6</td>
-<td>3.0.3 / 3.0.4</td>
+<td>22.05.9 / 23.02.04</td>
+<td>3.0.4</td>
 </tr>
 <tr>
-<td>8.4.1</td>
+<td>8.4.1-3154</td>
 <td>OpenPBS</td>
 <td>18.1.4 / 20.0.1 / 22.05.11</td>
 <td>2.0.19</td>
