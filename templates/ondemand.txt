@@ -6,7 +6,7 @@
 [cluster OnDemand]
 FormLayout = selectionpanel
 Category = Application
-IconUrl = "https://github.com/OSC/openondemand.org/blob/gh-pages/assets/images/ood_logo_stack_rgb.png?raw=true"
+IconUrl = "https://raw.githubusercontent.com/OSC/openondemand.org/gh-pages/assets/images/ood_logo_stack_rgb.png"
 
 Autoscale = false
 
