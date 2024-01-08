@@ -53,6 +53,66 @@ In order to import the project in the current Azure CycleCloud instance, two ste
 - Importing the cluster template
 - Adding the reference to the cluster-init specs in Azure CycleCloud configuration
 
+### Importing the cluster template
 
+The prerequisite to import the project in an existing Azure CycleCloud instance is to have an [Azure CycleCloud CLI](https://learn.microsoft.com/en-us/azure/cyclecloud/how-to/install-cyclecloud-cli?view=cyclecloud-8). This can be also the Azure CycleCloud VM itself with an SSH access.
 
+```bash
 
+git clone https://github.com/wolfgang-desalvador/cyclecloud-ondemand.git
+cd ondemand-git
+git checkout 0.1.2
+cyclecloud import_template -f template/ondemand.txt
+
+```
+
+### Importing the project cluster-init specs in Azure CycleCloud definitions
+
+There are two options to achieve this:
+* Through Azure CycleCloud Web UI
+* Importing the configuration through a text file placed in Azure CycleCloud installation directories
+
+#### Through Azure CycleCloud Web UI
+
+In order to import the cluster-init specs through the UI, it is sufficient to go to Settings > Records > CycleCloud > Cluster-Init Projects and to create a new project definition as displayed in the following pictures.
+
+The URL for the project is `https://github.com/wolfgang-desalvador/cyclecloud-ondemand/releases/0.1.2`
+
+![Step 1](assets/import/step1.png)
+
+![Step 2](assets/import/step2.png)
+
+![Step 3](assets/import/step3.png)
+
+![Step 4](assets/import/step4.png)
+
+![Step 5](assets/import/step5.png)
+
+#### Through the commandline
+
+It is possible to do the same operation from commandline on the Azure CycleCloud VM.
+
+First of asll let's elevate the permission as root on the VM
+
+```bash
+sudo su
+```
+
+Then, let's insert the following content into a file named `/opt/cycle_server/config/data/ondemand.txt`:
+
+```bash
+AdType = "Cloud.Project"
+Version = "0.1.2"
+ProjectType = "Application"
+Url = "https://github.com/wolfgang-desalvador/cyclecloud-ondemand/releases/0.1.2"
+AutoUpgrade = false
+Name = "ondemand"
+```
+
+If import has been successful, after a few seconds the template name should change with the “imported” extension attached:
+
+ ```bash
+ls /opt/cycle_server/config/data/
+
+marketplace_site_id.txt.imported  ondemand.txt.imported  settings.txt.imported  theme.txt.imported
+```
