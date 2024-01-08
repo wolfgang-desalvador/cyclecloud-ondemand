@@ -638,7 +638,7 @@ Order = 20
 
 
         [[[parameter SchedulerImageName]]]
-        Label = Scheduler OS
+        Label = Portal OS
         ParameterType = Cloud.Image
         Config.OS = linux
         DefaultValue = OpenLogic:CentOS-HPC:7_9-gen2:7.9.2022040101
