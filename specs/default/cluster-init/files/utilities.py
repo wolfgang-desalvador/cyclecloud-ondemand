@@ -3,7 +3,6 @@ import yaml
 import json
 
 from azure.keyvault.secrets import SecretClient
-from azure.keyvault.keys import KeyClient
 from azure.identity import DefaultAzureCredential
 
 from constants import OOD_CONFIG_PATH
@@ -44,12 +43,6 @@ def getSecretValue(keyVaultName, secretName):
     credential = DefaultAzureCredential()
     client = SecretClient(vault_url=vaultURL, credential=credential)
     return client.get_secret(secretName).value
-
-def getKeyValue(keyVaultName, keyName):
-    vaultURL = "https://" + keyVaultName + ".vault.azure.net"
-    credential = DefaultAzureCredential()
-    client = KeyClient(vault_url=vaultURL, credential=credential)
-    return client.get_key(secretName).value
 
 def concatenateToOnDemandConfiguration(configuration):
     with open(OOD_CONFIG_PATH, 'a') as fid:

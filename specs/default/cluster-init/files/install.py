@@ -3,6 +3,7 @@ import shutil
 import datetime
 import yaml
 import os
+import base64
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes
@@ -224,11 +225,24 @@ class OpenOnDemandInstaller():
         ])
     
     def _configureKeyVaultSSL(self):
-        with open(OOD_CERT_LOCATION, 'w') as fid:
-            fid.write(getSecretValue(self.cycleCloudOnDemandSettings['ondemand']['keyVaultName'], self.cycleCloudOnDemandSettings['ondemand']['ssl']['certificateName']))
+        certificate = getSecretValue(self.cycleCloudOnDemandSettings['ondemand']['keyVaultName'], self.cycleCloudOnDemandSettings['ondemand']['ssl']['certificateName']))
 
-        with open(OOD_KEY_LOCATION, 'w') as fid:
-            fid.write(getKeyValue(self.cycleCloudOnDemandSettings['ondemand']['keyVaultName'], self.cycleCloudOnDemandSettings['ondemand']['ssl']['certificateKeyName']))
+        certificateBytes = base64.b64decode(certificate.value)
+        key, cert, _ = serialization.pkcs12.load_key_and_certificates(
+            data=certificateBytes,
+            password=None
+        )
+        
+        # Write our certificate out to disk.
+        with open(OOD_KEY_LOCATION, "wb") as f:
+            f.write(key.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.TraditionalOpenSSL,
+                encryption_algorithm=serialization.NoEncryption()
+            ))
+
+        with open(OOD_CERT_LOCATION, "wb") as f:
+            f.write(cert.public_bytes(serialization.Encoding.PEM))
 
     def _configurePBS(self):
         schedulerVersion = self.cycleCloudOnDemandSettings['ondemand']['scheduler']['pbsVersion']
