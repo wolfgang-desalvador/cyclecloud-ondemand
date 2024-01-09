@@ -11,7 +11,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
 from utilities import  getRHELVersion, createUserAndGroup, executeCommandList, readOnDemandConfiguration, writeOnDemandConfiguration, \
-      getSecretValue, readOnDemandConfiguration, writeOnDemandConfiguration, getSecretValue, getJetpackConfiguration, executeCommandList
+      getSecretValue, readOnDemandConfiguration, writeOnDemandConfiguration, getKeyValue, getJetpackConfiguration, executeCommandList
 from constants import OOD_CONFIG_PATH, OOD_CERT_LOCATION, OOD_KEY_LOCATION, SLURM_PACKAGE_NAME, CONFIGURATION_COMPLETED
 from logger import OnDemandCycleCloudLogger
 
@@ -228,7 +228,7 @@ class OpenOnDemandInstaller():
             fid.write(getSecretValue(self.cycleCloudOnDemandSettings['ondemand']['keyVaultName'], self.cycleCloudOnDemandSettings['ondemand']['ssl']['certificateName']))
 
         with open(OOD_KEY_LOCATION, 'w') as fid:
-            fid.write(getSecretValue(self.cycleCloudOnDemandSettings['ondemand']['keyVaultName'], self.cycleCloudOnDemandSettings['ondemand']['ssl']['certificateKeyName']))
+            fid.write(getKeyValue(self.cycleCloudOnDemandSettings['ondemand']['keyVaultName'], self.cycleCloudOnDemandSettings['ondemand']['ssl']['certificateKeyName']))
 
     def _configurePBS(self):
         schedulerVersion = self.cycleCloudOnDemandSettings['ondemand']['scheduler']['pbsVersion']
