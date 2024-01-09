@@ -13,7 +13,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 
 from utilities import  getRHELVersion, createUserAndGroup, executeCommandList, readOnDemandConfiguration, writeOnDemandConfiguration, \
       getSecretValue, readOnDemandConfiguration, writeOnDemandConfiguration, getKeyValue, getJetpackConfiguration, executeCommandList
-from constants import OOD_CONFIG_PATH, OOD_CERT_LOCATION, OOD_KEY_LOCATION, SLURM_PACKAGE_NAME, CONFIGURATION_COMPLETED
+from constants import OOD_CONFIG_PATH, OOD_CERT_LOCATION, OOD_KEY_LOCATION, SLURM_PACKAGE_NAME, CONFIGURATION_COMPLETED, OOD_INTERMEDIATE_CERT_LOCATION
 from logger import OnDemandCycleCloudLogger
 
 
@@ -225,24 +225,30 @@ class OpenOnDemandInstaller():
         ])
     
     def _configureKeyVaultSSL(self):
-        certificate = getSecretValue(self.cycleCloudOnDemandSettings['ondemand']['keyVaultName'], self.cycleCloudOnDemandSettings['ondemand']['ssl']['certificateName']))
+        certificate = getSecretValue(self.cycleCloudOnDemandSettings['ondemand']['keyVaultName'], self.cycleCloudOnDemandSettings['ondemand']['ssl']['certificateName'])
 
-        certificateBytes = base64.b64decode(certificate.value)
+        certificateBytes = base64.b64decode(certificate)
         key, cert, _ = serialization.pkcs12.load_key_and_certificates(
             data=certificateBytes,
             password=None
         )
         
-        # Write our certificate out to disk.
+        # Write our key out to disk.
         with open(OOD_KEY_LOCATION, "wb") as f:
             f.write(key.private_bytes(
                 encoding=serialization.Encoding.PEM,
                 format=serialization.PrivateFormat.TraditionalOpenSSL,
                 encryption_algorithm=serialization.NoEncryption()
             ))
-
+        # Write our cert out to disk.
         with open(OOD_CERT_LOCATION, "wb") as f:
             f.write(cert.public_bytes(serialization.Encoding.PEM))
+
+        if self.cycleCloudOnDemandSettings['ondemand']['ssl']['intermediateCertificate']:
+            intermediateCertificateName = self.cycleCloudOnDemandSettings['ondemand']['ssl']['intermediateCertificateName']
+            # Write our intermediate cert out to disk.
+            with open(OOD_INTERMEDIATE_CERT_LOCATION, "w") as f:
+                f.write(getSecretValue(intermediateCertificateName))
 
     def _configurePBS(self):
         schedulerVersion = self.cycleCloudOnDemandSettings['ondemand']['scheduler']['pbsVersion']
@@ -375,6 +381,11 @@ class OpenOnDemandInstaller():
             'SSLCertificateFile "{}"'.format(OOD_CERT_LOCATION),
             'SSLCertificateKeyFile "{}"'.format(OOD_KEY_LOCATION)
         ]
+
+        if self.cycleCloudOnDemandSettings['ondemand']['ssl']['intermediateCertificate']:
+            onDemandConfiguration['ssl'].append(
+                'SSLCertificateChainFile "{}"'.format(OOD_INTERMEDIATE_CERT_LOCATION)
+            )
 
         writeOnDemandConfiguration(onDemandConfiguration)
 
