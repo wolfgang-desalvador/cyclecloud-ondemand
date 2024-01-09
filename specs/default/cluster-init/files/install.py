@@ -225,10 +225,10 @@ class OpenOnDemandInstaller():
     
     def _configureKeyVaultSSL(self):
         with open(OOD_CERT_LOCATION, 'w') as fid:
-            fid.write(getSecretValue(self.cycleCloudOnDemandSettings['keyVaultName'], self.cycleCloudOnDemandSettings['ssl']['certficateName']))
+            fid.write(getSecretValue(self.cycleCloudOnDemandSettings['ondemand']['keyVaultName'], self.cycleCloudOnDemandSettings['ondemand']['ssl']['certficateName']))
 
         with open(OOD_KEY_LOCATION, 'w') as fid:
-            fid.write(getSecretValue(self.cycleCloudOnDemandSettings['keyVaultName'], self.cycleCloudOnDemandSettings['ssl']['certficateKeyName']))
+            fid.write(getSecretValue(self.cycleCloudOnDemandSettings['ondemand']['keyVaultName'], self.cycleCloudOnDemandSettings['ondemand']['ssl']['certficateKeyName']))
 
     def _configurePBS(self):
         schedulerVersion = self.cycleCloudOnDemandSettings['ondemand']['scheduler']['pbsVersion']

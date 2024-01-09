@@ -45,6 +45,18 @@ The project has been tested on the following matrix:
 <td>18.1.4 / 20.0.1 / 22.05.11</td>
 <td>2.0.19</td>
 </tr>
+<tr>
+<td>8.5.0-3196</td>
+<td>Slurm</td>
+<td>22.05.10 / 23.02.04</td>
+<td>3.0.4</td>
+</tr>
+<tr>
+<td>8.4.1-3154</td>
+<td>OpenPBS</td>
+<td>18.1.4 / 20.0.1 / 22.05.11</td>
+<td>2.0.19</td>
+</tr>
 </table>
 
 ## Creating an Azure Key Vault
