@@ -13,7 +13,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 
 from utilities import  getRHELVersion, createUserAndGroup, executeCommandList, readOnDemandConfiguration, writeOnDemandConfiguration, \
       getSecretValue, readOnDemandConfiguration, writeOnDemandConfiguration, getKeyValue, getJetpackConfiguration, executeCommandList
-from constants import OOD_CONFIG_PATH, OOD_CERT_LOCATION, OOD_KEY_LOCATION, SLURM_PACKAGE_NAME, CONFIGURATION_COMPLETED, OOD_INTERMEDIATE_CERT_LOCATION
+from constants import OOD_CONFIG_PATH, OOD_CERT_LOCATION, OOD_KEY_LOCATION, SLURM_PACKAGE_NAMES, CONFIGURATION_COMPLETED, OOD_INTERMEDIATE_CERT_LOCATION
 from logger import OnDemandCycleCloudLogger
 
 
@@ -285,11 +285,6 @@ class OpenOnDemandInstaller():
         slurmBinaryName = "slurm-{}-1.el{}.x86_64.rpm".format(
                 schedulerVersion, self.osVersion)
 
-        if self.osVersion == "7":
-            slurmFolder = "slurm-pkgs-centos7"
-        elif self.osVersion == "8":
-            slurmFolder = "slurm-pkgs-rhel8"
-
         createUserAndGroup("slurm", self.cycleCloudOnDemandSettings['ondemand']['scheduler']['slurmUID'], self.cycleCloudOnDemandSettings['ondemand']['scheduler']['slurmGID'])
         createUserAndGroup("munge", self.cycleCloudOnDemandSettings['ondemand']['scheduler']['mungeUID'], self.cycleCloudOnDemandSettings['ondemand']['scheduler']['mungeGID'])
 
@@ -308,9 +303,19 @@ class OpenOnDemandInstaller():
             "chmod 600 /etc/munge/munge.key",
             "systemctl enable munge --now",
             "systemctl restart munge",
-            "jetpack download {} --project ondemand ./".format(SLURM_PACKAGE_NAME),
-            "tar -xzf {}".format(SLURM_PACKAGE_NAME),
-            "yum localinstall -y azure-slurm-install/{}/{}".format(slurmFolder, slurmBinaryName),
+            "mkdir slurm-packages"
+        ])
+
+        for package in SLURM_PACKAGE_NAMES:
+            executeCommandList([
+            "jetpack download {} --project ondemand ./".format(package),
+            "tar -xzf {}".format(package),
+            "find azure-slurm-install/ -name \"*.rpm\" -exec cp -r {} slurm-packages/ \;"
+            "rm -rf azure-slurm-install"
+            ])
+        
+        executeCommandList([
+            "yum localinstall -y slurm-packages/{}".format(slurmBinaryName),
             "mkdir -p /etc/slurm",
             "ln -sf {}/slurm.conf /etc/slurm/slurm.conf".format(configurationPath),
             "ln -sf {}/gres.conf /etc/slurm/gres.conf".format(configurationPath),
