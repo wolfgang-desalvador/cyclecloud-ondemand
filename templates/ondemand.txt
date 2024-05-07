@@ -33,7 +33,7 @@ Autoscale = false
         cyclecloud.exports.shared.samba.enabled = false
         cyclecloud.exports.defaults.samba.enabled = false      
         cshared.server.legacy_links_disabled = true
-        ondemand.repourl = "https://yum.osc.edu/ondemand/3.0/ondemand-release-web-3.0-1.el7.noarch.rpm"
+        ondemand.repourl = $onDemandVersion
         ondemand.auth.AuthType = $AuthType
         ondemand.auth.oidcAAD.ClientID = $ClientID
         ondemand.auth.oidcAAD.ClientSecretName = $ClientSecretName
@@ -313,6 +313,15 @@ Order = 17
         Label = Extra configuration
         Description = Extra configuration to concatenate to OnDemand YML configuration file
         Order = 5
+    
+    [[[parameter onDemandVersion]]]
+        Label = OnDemand Portal Version
+        ParameterType = StringList
+        Config.Label = Version of the OnDemand portal
+        Config.Plugin = pico.form.Dropdown
+        Config.Entries := {[Label="3.0"; Value="https://yum.osc.edu/ondemand/3.0/ondemand-release-web-3.0-1.noarch.rpm"], [Label="3.1 (only el8)"; Value="https://yum.osc.edu/ondemand/3.1/ondemand-release-web-3.1-1.el7.noarch.rpm"]}
+        Conditions.Excluded := schedulerType == "slurm"
+        DefaultValue = 18.1.4
 
     [[parameters Secrets Configuration]]
         Order = 15
