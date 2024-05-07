@@ -318,10 +318,10 @@ Order = 17
         Label = OnDemand Portal Version
         ParameterType = StringList
         Config.Label = Version of the OnDemand portal
+        Condition:Required = true
         Config.Plugin = pico.form.Dropdown
         Config.Entries := {[Label="3.0"; Value="https://yum.osc.edu/ondemand/3.0/ondemand-release-web-3.0-1.noarch.rpm"], [Label="3.1 (only el8)"; Value="https://yum.osc.edu/ondemand/3.1/ondemand-release-web-3.1-1.el7.noarch.rpm"]}
-        Conditions.Excluded := schedulerType == "slurm"
-        DefaultValue = 18.1.4
+        DefaultValue = 3.0
 
     [[parameters Secrets Configuration]]
         Order = 15
