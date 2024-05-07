@@ -36,7 +36,7 @@ The project has been tested on the following matrix:
 <tr>
 <td>8.4.1-3154</td>
 <td>Slurm</td>
-<td>22.05.9 / 23.02.04</td>
+<td>22.05.9 / 23.02.05</td>
 <td>3.0.4</td>
 </tr>
 <tr>
@@ -48,8 +48,8 @@ The project has been tested on the following matrix:
 <tr>
 <td>8.5.0-3196</td>
 <td>Slurm</td>
-<td>22.05.10 / 23.02.04</td>
-<td>3.0.4</td>
+<td>22.05.10 / 23.02.06</td>
+<td>3.0.5</td>
 </tr>
 <tr>
 <td>8.5.0-3196</td>

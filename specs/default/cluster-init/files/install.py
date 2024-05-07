@@ -9,10 +9,11 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.serialization import pkcs12
 from cryptography.hazmat.primitives.asymmetric import rsa
 
 from utilities import  getRHELVersion, createUserAndGroup, executeCommandList, readOnDemandConfiguration, writeOnDemandConfiguration, \
-      getSecretValue, readOnDemandConfiguration, writeOnDemandConfiguration, getKeyValue, getJetpackConfiguration, executeCommandList
+      getSecretValue, readOnDemandConfiguration, writeOnDemandConfiguration, getJetpackConfiguration, executeCommandList
 from constants import OOD_CONFIG_PATH, OOD_CERT_LOCATION, OOD_KEY_LOCATION, SLURM_PACKAGE_NAMES, CONFIGURATION_COMPLETED, OOD_INTERMEDIATE_CERT_LOCATION
 from logger import OnDemandCycleCloudLogger
 
@@ -228,7 +229,7 @@ class OpenOnDemandInstaller():
         certificate = getSecretValue(self.cycleCloudOnDemandSettings['ondemand']['keyVaultName'], self.cycleCloudOnDemandSettings['ondemand']['ssl']['certificateName'])
 
         certificateBytes = base64.b64decode(certificate)
-        key, cert, _ = serialization.pkcs12.load_key_and_certificates(
+        key, cert, _ = pkcs12.load_key_and_certificates(
             data=certificateBytes,
             password=None
         )
