@@ -311,7 +311,7 @@ class OpenOnDemandInstaller():
             executeCommandList([
             "jetpack download {} --project ondemand ./".format(package),
             "tar -xzf {}".format(package),
-            "find azure-slurm-install/ -name *.rpm -exec cp -r {} slurm-packages/ ;"
+            "find azure-slurm-install/ -name *.rpm -exec cp -r {} slurm-packages/ ;",
             "rm -rf azure-slurm-install"
             ])
         
@@ -433,6 +433,7 @@ class OpenOnDemandInstaller():
     def installPortal(self):
         self.logger.debug('The selected OS Version is {}'.format(self.osVersion))
 
+        repourl = self.cycleCloudOnDemandSettings['ondemand']['repourl']
         if self.osVersion == "7":
             self.logger.debug("Executing recipe for RHEL 7")
             executeCommandList([
@@ -445,7 +446,7 @@ class OpenOnDemandInstaller():
                 "ln -s /ood/opt /opt/ood",
                 "ln -s /ood/www /var/www/ood",
                 "yum install -y centos-release-scl epel-release",
-                "yum install -y https://yum.osc.edu/ondemand/3.0/ondemand-release-web-3.0-1.noarch.rpm",
+                "yum install -y {}".format(repourl),
                 "yum install -y ondemand",
                 "yum install -y python3",
                 "yum install -y ondemand-dex"
@@ -456,7 +457,7 @@ class OpenOnDemandInstaller():
                 "dnf config-manager --set-enabled powertools",
                 "dnf install epel-release -y",
                 "dnf module enable ruby:3.0 nodejs:14 -y",
-                "yum install https://yum.osc.edu/ondemand/3.0/ondemand-release-web-3.0-1.noarch.rpm -y",
+                "yum install {} -y".format(repourl),
                 "yum install -y ondemand-dex",
                 "yum install ondemand -y"
             ])
