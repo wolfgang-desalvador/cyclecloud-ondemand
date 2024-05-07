@@ -109,9 +109,9 @@ The prerequisite to import the project in an existing Azure CycleCloud instance 
 ```bash
 
 git clone https://github.com/wolfgang-desalvador/cyclecloud-ondemand.git
-cd ondemand-git
+cd cyclecloud-ondemand
 git checkout 0.1.3
-cyclecloud import_template -f template/ondemand.txt
+cyclecloud import_template -f templates/ondemand.txt
 ```
 
 ### Importing the project cluster-init specs in Azure CycleCloud definitions

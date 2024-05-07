@@ -650,8 +650,8 @@ Order = 20
         Label = Portal OS
         ParameterType = Cloud.Image
         Config.OS = linux
-        DefaultValue = "centos7"
-        Config.Filter := Package in {"centos7", "almalinux8"}
+        DefaultValue = "cycle.image.centos7"
+        Config.Filter := Package in {"cycle.image.centos7", "almalinux8"}
 
         [[[parameter serverClusterInitSpecs]]]
         Label = Server Cluster-Init
