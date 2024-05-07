@@ -311,7 +311,7 @@ class OpenOnDemandInstaller():
             executeCommandList([
             "jetpack download {} --project ondemand ./".format(package),
             "tar -xzf {}".format(package),
-            "find azure-slurm-install/ -name *.rpm -exec cp -r {} slurm-packages/ \;"
+            "find azure-slurm-install/ -name *.rpm -exec cp -r {} slurm-packages/ ;"
             "rm -rf azure-slurm-install"
             ])
         
