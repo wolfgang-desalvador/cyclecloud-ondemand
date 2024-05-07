@@ -311,7 +311,7 @@ class OpenOnDemandInstaller():
             executeCommandList([
             "jetpack download {} --project ondemand ./".format(package),
             "tar -xzf {}".format(package),
-            "find azure-slurm-install/ -name \"*.rpm\" -exec cp -r {} slurm-packages/ \;"
+            "find azure-slurm-install/ -name *.rpm -exec cp -r {} slurm-packages/ \;"
             "rm -rf azure-slurm-install"
             ])
         
@@ -365,7 +365,7 @@ class OpenOnDemandInstaller():
         self.addExtraConfiguration()
 
         self.logger.debug('Finalizing OnDemand Installation')
-        self.finalizeInstalltion()
+        self.finalizeInstallation()
         
     def configureAuthentication(self):
         authenticationType = self.cycleCloudOnDemandSettings['ondemand']['auth']['AuthType']
@@ -461,7 +461,7 @@ class OpenOnDemandInstaller():
                 "yum install ondemand -y"
             ])
 
-    def finalizeInstalltion(self):
+    def finalizeInstallation(self):
         executeCommandList([       
             "rm -rf /var/run/ondemand-nginx/*",
             "chmod 600 /etc/ood/config/ood_portal.yml"
