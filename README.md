@@ -52,10 +52,22 @@ The project has been tested on the following matrix:
 <td>3.0.4</td>
 </tr>
 <tr>
-<td>8.4.1-3154</td>
+<td>8.5.0-3196</td>
 <td>OpenPBS</td>
 <td>18.1.4 / 20.0.1 / 22.05.11</td>
-<td>2.0.19</td>
+<td>2.0.20</td>
+</tr>
+<tr>
+<td>8.6.1-3248</td>
+<td>Slurm</td>
+<td>22.05.11 / 23.02.07</td>
+<td>3.0.6</td>
+</tr>
+<tr>
+<td>8.6.1-3248</td>
+<td>OpenPBS</td>
+<td>18.1.4 / 20.0.1 / 22.05.11</td>
+<td>2.0.21</td>
 </tr>
 </table>
 
@@ -98,9 +110,8 @@ The prerequisite to import the project in an existing Azure CycleCloud instance 
 
 git clone https://github.com/wolfgang-desalvador/cyclecloud-ondemand.git
 cd ondemand-git
-git checkout 0.1.2
+git checkout 0.1.3
 cyclecloud import_template -f template/ondemand.txt
-
 ```
 
 ### Importing the project cluster-init specs in Azure CycleCloud definitions
@@ -139,9 +150,9 @@ Then, let's insert the following content into a file named `/opt/cycle_server/co
 
 ```bash
 AdType = "Cloud.Project"
-Version = "0.1.2"
+Version = "0.1.3"
 ProjectType = "Application"
-Url = "https://github.com/wolfgang-desalvador/cyclecloud-ondemand/releases/0.1.2"
+Url = "https://github.com/wolfgang-desalvador/cyclecloud-ondemand/releases/0.1.3"
 AutoUpgrade = false
 Name = "ondemand"
 ```
