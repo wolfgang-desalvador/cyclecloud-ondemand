@@ -39,7 +39,18 @@ jobs:
           draft: false
           prerelease: true
 
-      - name: Upload Slurm install packages;
+      - name: Upload Slurm install packages 3.0.4;
+        id: upload-1
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: rpms/azure-slurm-install-pkg-3.0.4.tar.gz
+          asset_name: azure-slurm-install-pkg-3.0.4.tar.gz;
+          asset_content_type: application/octet-stream
+      
+      - name: Upload Slurm install packages 3.0.5;
         id: upload-1
         uses: actions/upload-release-asset@v1
         env:
@@ -48,6 +59,17 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: rpms/azure-slurm-install-pkg-3.0.5.tar.gz
           asset_name: azure-slurm-install-pkg-3.0.5.tar.gz;
+          asset_content_type: application/octet-stream
+
+      - name: Upload Slurm install packages 3.0.6;
+        id: upload-1
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: rpms/azure-slurm-install-pkg-3.0.6.tar.gz
+          asset_name: azure-slurm-install-pkg-3.0.6.tar.gz;
           asset_content_type: application/octet-stream
 
       - name: Upload openpbs-client-20.0.1-0.x86_64.rpm;
