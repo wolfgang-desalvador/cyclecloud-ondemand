@@ -124,7 +124,7 @@ There are two options to achieve this:
 
 In order to import the cluster-init specs through the UI, it is sufficient to go to Settings > Records > CycleCloud > Cluster-Init Projects and to create a new project definition as displayed in the following pictures.
 
-The URL for the project is `https://github.com/wolfgang-desalvador/cyclecloud-ondemand/releases/0.1.2`
+The URL for the project is `https://github.com/wolfgang-desalvador/cyclecloud-ondemand/releases/0.1.3`
 
 ![Step 1](assets/import/step1.png)
 

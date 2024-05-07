@@ -17,4 +17,4 @@ $PYTHON_INTERPRETER/bin/python -m pip install azure-keyvault-secrets azure-ident
 source $PYTHON_INTERPRETER/bin/activate
 
 $PYTHON_INTERPRETER/bin/python $SCRIPT_FOLDER/../files/install.py
-
+https://github.com/wolfgang-desalvador/cyclecloud-ondemand/releases/new
