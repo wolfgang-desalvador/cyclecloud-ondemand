@@ -51,7 +51,7 @@ jobs:
           asset_content_type: application/octet-stream
       
       - name: Upload Slurm install packages 3.0.5;
-        id: upload-1
+        id: upload-2
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -62,7 +62,7 @@ jobs:
           asset_content_type: application/octet-stream
 
       - name: Upload Slurm install packages 3.0.6;
-        id: upload-1
+        id: upload-3
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -73,7 +73,7 @@ jobs:
           asset_content_type: application/octet-stream
 
       - name: Upload openpbs-client-20.0.1-0.x86_64.rpm;
-        id: upload-3
+        id: upload-4
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -84,7 +84,7 @@ jobs:
           asset_content_type: application/octet-stream
 
       - name: Upload openpbs-client-22.05.11-0.x86_64.rpm;
-        id: upload-4
+        id: upload-5
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -95,7 +95,7 @@ jobs:
           asset_content_type: application/octet-stream
 
       - name: Upload pbspro-client-18.1.4-0.x86_64.rpm;
-        id: upload-9
+        id: upload-6
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
