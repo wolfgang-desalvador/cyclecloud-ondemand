@@ -171,7 +171,7 @@ class OpenOnDemandInstaller():
         writeOnDemandConfiguration(onDemandConfiguration)
         
         executeCommandList([
-            "/opt/ood/ood-portal-generator/sbin/update_ood_portal"
+            "/opt/ood/ood-portal-generator/sbin/update_ood_portal",
             "systemctl enable ondemand-dex",
             "systemctl restart ondemand-dex"
         ])

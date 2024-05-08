@@ -75,6 +75,13 @@ The project has been tested on the following matrix:
 
 In order to store the secrets involved in OnDemand Portal configuration, an Azure Key Vault will be required to be configured. This Azure Key Vault will be accessed during configuration through a managed identity.
 
+## Important remarks
+
+The use of Basic Authentication and the use of self-signed certificate option should be considered only in non-production environment because of the related security concerns.
+
+* In order to leverage OIDC authentication, you can check the guide about [creating an app registration in Entra ID](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app)
+* In order to use OIDC LDAP Dex, it is important that the account in use as the least priviledge on Active Directory, like read only account and all security policies for service accounts. This account only needs permission to read and perform LDAP queries.
+
 ## Creating a Managed Identity
 
 To create a Managed Identity for Azure OnDemand portal project, just run the following command in an Azure Cloud Shell or an Azure CLI enabled terminal (the Managed Identity can also be created by Azure Portal or by any other method):
@@ -88,12 +95,42 @@ where `MyIdentity` and `MyResourceGroup` are respectively the identity name and 
 
 It is important to assign the `Key Vault Secrets User` to this Managed Identity on the Azure Key Vault that will be used to store the portal secrets.
 
-
 ## Storing secrets in Azure Key Vault
 
-Secrets and certificates can be uploaded from the [commandline directly](https://learn.microsoft.com/en-us/cli/azure/keyvault/certificate?view=azure-cli-latest#az-keyvault-certificate-import) or using [Azure Portal](https://learn.microsoft.com/en-us/azure/key-vault/secrets/quick-create-portal).
+Secrets and certificates can be uploaded from the [commandline directly](https://learn.microsoft.com/en-us/cli/azure/keyvault?view=azure-cli-latest) or using [Azure Portal](https://learn.microsoft.com/en-us/azure/key-vault/secrets/quick-create-portal).
 
 The secrets / certificates name should then be used in the configuration of the project. 
+
+### SSL termination certificates
+
+The preferred format for this project to store in the Azure Key Vault the certificate for SSL termination of the OnDemand portal is `pfx`.
+
+In case you have already a certificate with a separate private key file and certificate file, you can convert this to `pfx` with:
+
+```
+openssl pkcs12 -export -out on-demand.pfx -inkey <private_key_name>.key -in <certificate_name>.crt
+```
+
+In case of intermediate certificates, you can create a bundle before exporting to `pfx`:
+
+```
+cat <certificate_name>.crt root_ca.crt >> on-demand.crt
+openssl pkcs12 -export -out on-demand.pfx -inkey <private_key_name>.key -in on-demand.crt
+```
+
+This certificate can then be imported from [commandline directly](https://learn.microsoft.com/en-us/cli/azure/keyvault/certificate?view=azure-cli-latest#az-keyvault-certificate-import).
+
+### LDAP Root CA
+
+The Root CA is supposed to be stored as an Azure Secret using the following CLI commands from an `az` login instance:
+
+```
+az keyvault secret set --vault-name <NAME OF THE KEY VAULT> --name <TARGET_SECRET_NAME> -f <LDAP_CA_FILE>.crt
+```
+
+### OIDC Secret or LDAP Bind Password
+
+The secrets for OIDC Client or for LDAP Bind Password should be stored as secret in the Azure KeyVault. Fasted way is to use [Azure Portal](https://learn.microsoft.com/en-us/azure/key-vault/secrets/quick-create-portal).
 
 
 ## Importing the project in Azure CycleCloud instance
