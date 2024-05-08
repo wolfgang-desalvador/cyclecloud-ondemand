@@ -444,7 +444,8 @@ class OpenOnDemandInstaller():
                 "ln -s /ood/etc /etc/ood",
                 "ln -s /ood/opt /opt/ood",
                 "ln -s /ood/www /var/www/ood",
-                "rm -rf /opt/rh/httpd24/root/etc/httpd/conf.d/"
+                "rm -rf /opt/rh/httpd24/root/etc/httpd/conf.d/",
+                "rm -rf /etc/httpd/conf.d/ood-portal.conf"
             ])
 
         else:
