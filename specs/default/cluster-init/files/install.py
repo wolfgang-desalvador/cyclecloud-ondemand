@@ -15,7 +15,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 
 from utilities import  getRHELVersion, createUserAndGroup, executeCommandList, readOnDemandConfiguration, writeOnDemandConfiguration, \
       getSecretValue, readOnDemandConfiguration, writeOnDemandConfiguration, getJetpackConfiguration, executeCommandList
-from constants import OOD_CONFIG_PATH, OOD_CERT_LOCATION, OOD_KEY_LOCATION, SLURM_PACKAGE_NAMES, CONFIGURATION_COMPLETED, OOD_INTERMEDIATE_CERT_LOCATION, RUBY_VERSION_MAPPING, NODE_JS_VERSION_MAPPING
+from constants import OOD_CONFIG_PATH, OOD_CERT_LOCATION, OOD_KEY_LOCATION, SLURM_PACKAGE_NAMES, CONFIGURATION_COMPLETED, OOD_INTERMEDIATE_CERT_LOCATION, RUBY_VERSION_MAPPING, NODE_JS_VERSION_MAPPING, OOD_LDAP_CERT_LOCATION
 from logger import OnDemandCycleCloudLogger
 
 
@@ -162,10 +162,24 @@ class OpenOnDemandInstaller():
         }
 
         if oidcLDAP['requiresLDAPCert']:
-            with open('/etc/ssl/ldap.crt', 'w') as fid:
-                fid.write(getSecretValue(self.cycleCloudOnDemandSettings['ondemand']['keyVaultName'], oidcLDAP['ldapCertName']))
+            certificate = getSecretValue(self.cycleCloudOnDemandSettings['ondemand']['keyVaultName'], oidcLDAP['ldapCertName'])
 
-            onDemandConfiguration['dex']['connectors'][0]['config']['rootCA'] = '/etc/ssl/ldap.crt'
+            certificateBytes = base64.b64decode(certificate)
+            _, cert, intermediateCertificates = pkcs12.load_key_and_certificates(
+                data=certificateBytes,
+                password=None
+            )
+            
+            # Write our cert out to disk.
+            with open(OOD_LDAP_CERT_LOCATION, "wb") as f:
+                f.write(cert.public_bytes(serialization.Encoding.PEM))
+
+            for intermediateCertificate in intermediateCertificates:
+                # Write our intermediate cert out to disk.
+                with open(OOD_LDAP_CERT_LOCATION, "ab") as f:
+                    f.write(intermediateCertificate.public_bytes(serialization.Encoding.PEM))
+
+            onDemandConfiguration['dex']['connectors'][0]['config']['rootCA'] = OOD_LDAP_CERT_LOCATION
 
         self._logConfiguration(onDemandConfiguration)
         writeOnDemandConfiguration(onDemandConfiguration)
@@ -248,7 +262,7 @@ class OpenOnDemandInstaller():
 
         for intermediateCertificate in intermediateCertificates:
             # Write our intermediate cert out to disk.
-            with open(OOD_INTERMEDIATE_CERT_LOCATION, "a") as f:
+            with open(OOD_INTERMEDIATE_CERT_LOCATION, "ab") as f:
                 f.write(intermediateCertificate.public_bytes(serialization.Encoding.PEM))
 
     def _configurePBS(self):
