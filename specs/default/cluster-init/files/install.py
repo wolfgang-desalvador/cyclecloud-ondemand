@@ -162,22 +162,8 @@ class OpenOnDemandInstaller():
         }
 
         if oidcLDAP['requiresLDAPCert']:
-            certificate = getSecretValue(self.cycleCloudOnDemandSettings['ondemand']['keyVaultName'], oidcLDAP['ldapCertName'])
-
-            certificateBytes = base64.b64decode(certificate)
-            _, cert, intermediateCertificates = pkcs12.load_key_and_certificates(
-                data=certificateBytes,
-                password=None
-            )
-            
-            # Write our cert out to disk.
-            with open(OOD_LDAP_CERT_LOCATION, "wb") as f:
-                f.write(cert.public_bytes(serialization.Encoding.PEM))
-
-            for intermediateCertificate in intermediateCertificates:
-                # Write our intermediate cert out to disk.
-                with open(OOD_LDAP_CERT_LOCATION, "ab") as f:
-                    f.write(intermediateCertificate.public_bytes(serialization.Encoding.PEM))
+            with open(OOD_LDAP_CERT_LOCATION, 'w') as fid:
+                fid.write(getSecretValue(self.cycleCloudOnDemandSettings['ondemand']['keyVaultName'], oidcLDAP['ldapCertName']))
 
             onDemandConfiguration['dex']['connectors'][0]['config']['rootCA'] = OOD_LDAP_CERT_LOCATION
 
