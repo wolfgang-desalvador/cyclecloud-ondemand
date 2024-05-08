@@ -452,6 +452,7 @@ class OpenOnDemandInstaller():
                 "mkdir -p /ood/etc",
                 "mkdir -p /ood/opt",
                 "mkdir -p /ood/www",
+                "mkdir -p /var/www",
                 "ln -s /ood/etc /etc/ood",
                 "ln -s /ood/opt /opt/ood",
                 "ln -s /ood/www /var/www/ood",
