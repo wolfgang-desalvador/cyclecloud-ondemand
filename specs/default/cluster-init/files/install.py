@@ -230,7 +230,7 @@ class OpenOnDemandInstaller():
         certificate = getSecretValue(self.cycleCloudOnDemandSettings['ondemand']['keyVaultName'], self.cycleCloudOnDemandSettings['ondemand']['ssl']['certificateName'])
 
         certificateBytes = base64.b64decode(certificate)
-        key, cert, _ = pkcs12.load_key_and_certificates(
+        key, cert, intermediateCertificates = pkcs12.load_key_and_certificates(
             data=certificateBytes,
             password=None
         )
@@ -246,11 +246,10 @@ class OpenOnDemandInstaller():
         with open(OOD_CERT_LOCATION, "wb") as f:
             f.write(cert.public_bytes(serialization.Encoding.PEM))
 
-        if self.cycleCloudOnDemandSettings['ondemand']['ssl']['intermediateCertificate']:
-            intermediateCertificateName = self.cycleCloudOnDemandSettings['ondemand']['ssl']['intermediateCertificateName']
+        for intermediateCertificate in intermediateCertificates:
             # Write our intermediate cert out to disk.
-            with open(OOD_INTERMEDIATE_CERT_LOCATION, "w") as f:
-                f.write(getSecretValue(intermediateCertificateName))
+            with open(OOD_INTERMEDIATE_CERT_LOCATION, "a") as f:
+                f.write(intermediateCertificate.public_bytes(serialization.Encoding.PEM))
 
     def _configurePBS(self):
         schedulerVersion = self.cycleCloudOnDemandSettings['ondemand']['scheduler']['pbsVersion']

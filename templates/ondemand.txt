@@ -60,8 +60,6 @@ Autoscale = false
         
         ondemand.ssl.SSLType = $SSLType
         ondemand.ssl.certificateName = $certificateName
-        ondemand.ssl.intermediateCertificate = $intermediateCertificate
-        ondemand.ssl.intermediateCertificateName = $intermediateCertificateName
         ondemand.portal.ip = $PortalIP
         ondemand.portal.serverName = $PortalName
         ondemand.portal.extraConfiguration = $extraConfiguration
@@ -578,22 +576,6 @@ Order = 17
         Conditions.Excluded := SSLType == "self_signed"
         Conditions.Required := SSLType != "self_signed"
         Order = 46
-
-        [[[parameter intermediateCertificate]]]
-        DefaultValue = false
-        HideLabel = true
-        Widget.Plugin = pico.form.BooleanCheckBox
-        Widget.Label = Requires Intermediate Cert
-        Conditions.Excluded := SSLType == "self_signed"
-        Order = 43
-        
-        [[[parameter intermediateCertificateName]]]
-        Label = Intermediate Certificate Name
-        Description = Intermediate Certificate name in Azure Key Vault
-        DefaultValue = ""
-        Conditions.Excluded := SSLType == "self_signed" || intermediateCertificate == false 
-        Conditions.Required := SSLType != "self_signed" && intermediateCertificate == true
-        Order = 48
         
         
 [parameters Scheduler]
