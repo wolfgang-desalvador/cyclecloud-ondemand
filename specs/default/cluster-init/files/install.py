@@ -344,7 +344,7 @@ class OpenOnDemandInstaller():
             shutil.copy(OOD_CONFIG_PATH, OOD_CONFIG_PATH + str(time.time()))
             os.remove(OOD_CONFIG_PATH)
         
-        writeOnDemandConfiguration([])
+        writeOnDemandConfiguration({})
 
     def install(self):
         if self._isConfigured():
@@ -446,28 +446,29 @@ class OpenOnDemandInstaller():
             fid.write('Configuration completed!')
 
     def prepareExternalDiskFolders(self, linkExistingFolders=False):        
-        if linkExistingFolders and not any([os.path.islink(folder) for folder in ['/etc/ood', '/opt/ood', '/var/www/ood']]):
-            executeCommandList([
-                "mv /etc/ood/ /etc/ood_old",
-                "mv /opt/ood/ /opt/ood_old",
-                "mv /var/www/ood /var/www/ood_old",
-                "ln -s /ood/etc /etc/ood",
-                "ln -s /ood/opt /opt/ood",
-                "ln -s /ood/www /var/www/ood",
-                "rm -rf /opt/rh/httpd24/root/etc/httpd/conf.d/ood-portal.conf",
-                "rm -rf /etc/httpd/conf.d/ood-portal.conf"
-            ])
+        if not any([os.path.islink(folder) for folder in ['/etc/ood', '/opt/ood', '/var/www/ood']]):
+            if linkExistingFolders:
+                executeCommandList([
+                    "mv /etc/ood/ /etc/ood_old",
+                    "mv /opt/ood/ /opt/ood_old",
+                    "mv /var/www/ood /var/www/ood_old",
+                    "ln -s /ood/etc /etc/ood",
+                    "ln -s /ood/opt /opt/ood",
+                    "ln -s /ood/www /var/www/ood",
+                    "rm -rf /opt/rh/httpd24/root/etc/httpd/conf.d/ood-portal.conf",
+                    "rm -rf /etc/httpd/conf.d/ood-portal.conf"
+                ])
 
-        else:
-            executeCommandList([
-                "mkdir -p /ood/etc",
-                "mkdir -p /ood/opt",
-                "mkdir -p /ood/www",
-                "mkdir -p /var/www",
-                "ln -s /ood/etc /etc/ood",
-                "ln -s /ood/opt /opt/ood",
-                "ln -s /ood/www /var/www/ood",
-            ])
+            else:
+                executeCommandList([
+                    "mkdir -p /ood/etc",
+                    "mkdir -p /ood/opt",
+                    "mkdir -p /ood/www",
+                    "mkdir -p /var/www",
+                    "ln -s /ood/etc /etc/ood",
+                    "ln -s /ood/opt /opt/ood",
+                    "ln -s /ood/www /var/www/ood",
+                ])
                      
     def installPortal(self):
         self.logger.debug('The selected OS Version is {}'.format(self.osVersion))
