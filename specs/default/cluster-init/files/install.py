@@ -14,7 +14,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 
 from utilities import  getRHELVersion, createUserAndGroup, executeCommandList, readOnDemandConfiguration, writeOnDemandConfiguration, \
       getSecretValue, readOnDemandConfiguration, writeOnDemandConfiguration, getJetpackConfiguration, executeCommandList
-from constants import OOD_CONFIG_PATH, OOD_CERT_LOCATION, OOD_KEY_LOCATION, SLURM_PACKAGE_NAMES, CONFIGURATION_COMPLETED, OOD_INTERMEDIATE_CERT_LOCATION
+from constants import OOD_CONFIG_PATH, OOD_CERT_LOCATION, OOD_KEY_LOCATION, SLURM_PACKAGE_NAMES, CONFIGURATION_COMPLETED, OOD_INTERMEDIATE_CERT_LOCATION, RUBY_VERSION_MAPPING, NODE_JS_VERSION_MAPPING
 from logger import OnDemandCycleCloudLogger
 
 
@@ -341,12 +341,17 @@ class OpenOnDemandInstaller():
     def install(self):
         if self._isConfigured():
             self.logger.warn('Skipping installation since already configured')
+            self.logger.debug('Install Portal binaries, but link to existing external folders.')
+            self.installPortal()
+            self.prepareExternalDiskFolders(linkExistingFolders=True)
 
         else:
             self.logger.debug('Initializing OnDemand Installation')
-
+            self.logger.debug('Prepare directory structure')
+            self.prepareExternalDiskFolders()
             self.logger.debug('Install Portal')
             self.installPortal()
+            
             self.writeInstallationCompleted()
 
         self.logger.debug('Initializing authentication configuration')
@@ -430,21 +435,37 @@ class OpenOnDemandInstaller():
         with open(CONFIGURATION_COMPLETED, 'w') as fid:
             fid.write('Configuration completed!')
 
+    def prepareExternalDiskFolders(self, linkExistingFolders=True):        
+        if linkExistingFolders:
+            executeCommandList([
+                "mv /etc/ood/ /etc/ood_old",
+                "mv /opt/ood/ /opt/ood_old",
+                "mv /var/www/ /var/www_old",
+                "ln -s /ood/etc /etc/ood",
+                "ln -s /ood/opt /opt/ood",
+                "ln -s /ood/www /var/www/ood",
+                "rm -rf /opt/rh/httpd24/root/etc/httpd/conf.d/"
+            ])
+
+        else:
+            executeCommandList([
+                "mkdir -p /ood/etc",
+                "mkdir -p /ood/opt",
+                "mkdir -p /ood/www",
+                "ln -s /ood/etc /etc/ood",
+                "ln -s /ood/opt /opt/ood",
+                "ln -s /ood/www /var/www/ood",
+            ])
+                     
     def installPortal(self):
         self.logger.debug('The selected OS Version is {}'.format(self.osVersion))
 
         repourl = self.cycleCloudOnDemandSettings['ondemand']['repourl']
+
+
         if self.osVersion == "7":
             self.logger.debug("Executing recipe for RHEL 7")
             executeCommandList([
-                "rm -rf /opt/rh/httpd24/root/etc/httpd/conf.d/",
-                "mkdir -p /ood/etc",
-                "mkdir -p /ood/opt",
-                "mkdir -p /ood/www",
-                "mkdir -p /var/www/",
-                "ln -s /ood/etc /etc/ood",
-                "ln -s /ood/opt /opt/ood",
-                "ln -s /ood/www /var/www/ood",
                 "yum install -y centos-release-scl epel-release",
                 "yum install -y {}".format(repourl),
                 "yum install -y ondemand",
@@ -456,7 +477,7 @@ class OpenOnDemandInstaller():
             executeCommandList([
                 "dnf config-manager --set-enabled powertools",
                 "dnf install epel-release -y",
-                "dnf module enable ruby:3.0 nodejs:14 -y",
+                "dnf module enable ruby:{} nodejs:{} -y".format(RUBY_VERSION_MAPPING[repourl], NODE_JS_VERSION_MAPPING[repourl]),
                 "yum install {} -y".format(repourl),
                 "yum install -y ondemand-dex",
                 "yum install ondemand -y"
