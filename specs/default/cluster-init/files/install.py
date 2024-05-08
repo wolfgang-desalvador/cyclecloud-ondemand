@@ -436,7 +436,7 @@ class OpenOnDemandInstaller():
             fid.write('Configuration completed!')
 
     def prepareExternalDiskFolders(self, linkExistingFolders=False):        
-        if linkExistingFolders:
+        if linkExistingFolders and not any([os.path.islink(folder) for folder in ['/etc/ood/', '/opt/ood', '/var/www']]):
             executeCommandList([
                 "mv /etc/ood/ /etc/ood_old",
                 "mv /opt/ood/ /opt/ood_old",
