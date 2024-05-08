@@ -4,6 +4,7 @@ import datetime
 import yaml
 import os
 import base64
+import time
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes
@@ -338,6 +339,13 @@ class OpenOnDemandInstaller():
         yaml.dump(clusterDefinition, open(
             '/etc/ood/config/clusters.d/slurm.yml', 'w'))
     
+    def backupConfiguration(self):
+        if os.path.exists(OOD_CONFIG_PATH):
+            shutil.copy(OOD_CONFIG_PATH, OOD_CONFIG_PATH + str(time.time()))
+            os.remove(OOD_CONFIG_PATH)
+        
+        writeOnDemandConfiguration([])
+
     def install(self):
         if self._isConfigured():
             self.logger.warn('Skipping installation since already configured')
@@ -353,6 +361,8 @@ class OpenOnDemandInstaller():
             self.installPortal()
             
             self.writeInstallationCompleted()
+
+        self.backupConfiguration()
 
         self.logger.debug('Initializing authentication configuration')
         self.configureAuthentication()
@@ -444,7 +454,7 @@ class OpenOnDemandInstaller():
                 "ln -s /ood/etc /etc/ood",
                 "ln -s /ood/opt /opt/ood",
                 "ln -s /ood/www /var/www/ood",
-                "rm -rf /opt/rh/httpd24/root/etc/httpd/conf.d/",
+                "rm -rf /opt/rh/httpd24/root/etc/httpd/conf.d/ood-portal.conf",
                 "rm -rf /etc/httpd/conf.d/ood-portal.conf"
             ])
 

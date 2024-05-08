@@ -37,7 +37,6 @@ def writeOnDemandConfiguration(configuration):
         yaml.dump(configuration, fid)
 
 
-
 def getSecretValue(keyVaultName, secretName):
     vaultURL = "https://" + keyVaultName + ".vault.azure.net"
     credential = DefaultAzureCredential()
