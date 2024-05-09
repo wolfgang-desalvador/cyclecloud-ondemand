@@ -402,7 +402,7 @@ class OpenOnDemandInstaller():
             'SSLCertificateKeyFile "{}"'.format(OOD_KEY_LOCATION)
         ]
 
-        if self.cycleCloudOnDemandSettings['ondemand']['ssl']['intermediateCertificate']:
+        if os.path.exists(OOD_INTERMEDIATE_CERT_LOCATION):
             onDemandConfiguration['ssl'].append(
                 'SSLCertificateChainFile "{}"'.format(OOD_INTERMEDIATE_CERT_LOCATION)
             )
