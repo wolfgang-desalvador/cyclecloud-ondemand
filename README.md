@@ -147,7 +147,7 @@ The prerequisite to import the project in an existing Azure CycleCloud instance 
 
 git clone https://github.com/wolfgang-desalvador/cyclecloud-ondemand.git
 cd cyclecloud-ondemand
-git checkout 0.1.3
+git checkout 0.1.4
 cyclecloud import_template -f templates/ondemand.txt
 ```
 
@@ -161,7 +161,7 @@ There are two options to achieve this:
 
 In order to import the cluster-init specs through the UI, it is sufficient to go to Settings > Records > CycleCloud > Cluster-Init Projects and to create a new project definition as displayed in the following pictures.
 
-The URL for the project is `https://github.com/wolfgang-desalvador/cyclecloud-ondemand/releases/0.1.3`
+The URL for the project is `https://github.com/wolfgang-desalvador/cyclecloud-ondemand/releases/0.1.4`
 
 ![Step 1](assets/import/step1.png)
 
@@ -187,9 +187,9 @@ Then, let's insert the following content into a file named `/opt/cycle_server/co
 
 ```bash
 AdType = "Cloud.Project"
-Version = "0.1.3"
+Version = "0.1.4"
 ProjectType = "Application"
-Url = "https://github.com/wolfgang-desalvador/cyclecloud-ondemand/releases/0.1.3"
+Url = "https://github.com/wolfgang-desalvador/cyclecloud-ondemand/releases/0.1.4"
 AutoUpgrade = false
 Name = "ondemand"
 ```

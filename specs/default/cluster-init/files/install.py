@@ -5,6 +5,7 @@ import yaml
 import os
 import base64
 import time
+import ipaddress
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes
@@ -191,9 +192,15 @@ class OpenOnDemandInstaller():
 
         # Various details about who we are. For a self-signed certificate the
         # subject and issuer are always the same.
+        serverName = self.cycleCloudOnDemandSettings['ondemand']['portal']['serverName']
         subject = issuer = x509.Name([
             x509.NameAttribute(NameOID.COMMON_NAME, self.cycleCloudOnDemandSettings['ondemand']['portal']['serverName']),
         ])
+
+        if all(part.isdigit() for part in serverName.split('.')):
+            subjectAlternativeName = x509.IPAddress(ipaddress.IPv4Address(serverName))
+        else:
+            subjectAlternativeName = x509.DNSName(serverName)
 
         cert = x509.CertificateBuilder().subject_name(
             subject
@@ -209,7 +216,7 @@ class OpenOnDemandInstaller():
             # Our certificate will be valid for 1 year
             datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=365)
         ).add_extension(
-            x509.SubjectAlternativeName([x509.DNSName(self.cycleCloudOnDemandSettings['ondemand']['portal']['serverName'])]),
+            x509.SubjectAlternativeName([subjectAlternativeName]),
             critical=False,
         # Sign our certificate with our private key
         ).add_extension(

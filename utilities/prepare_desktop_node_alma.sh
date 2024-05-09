@@ -1,4 +1,5 @@
 #!/bin/bash
+set -xe
 yum install -y epel-release
 systemctl disable firewalld --now
 setenforce 0
