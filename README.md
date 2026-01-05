@@ -1,3 +1,6 @@
+> [!WARNING]  
+> This repository has been archived and is no longer actively maintained. Please refer to the [new official repository](https://github.com/Azure/cyclecloud-open-ondemand)
+ 
 # Azure CycleCloud OnDemand
 
 ## Introduction
